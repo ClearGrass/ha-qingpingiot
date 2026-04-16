@@ -1,16 +1,18 @@
 {
-  "domain": "qingping",
-  "name": "qingping",
+  "domain": "qingpingiot",
+  "name": "Qingping",
   "codeowners": [
-    "@https://github.com/qingping/qingping"
+    "@qingping"
   ],
   "config_flow": true,
-  "dependencies": [],
-  "documentation": "https://www.home-assistant.io/integrations/qingping",
-  "homekit": {},
+  "dependencies": ["mqtt"],
+  "documentation": "https://github.com/qingping/qingping",
+  "issue_tracker": "https://github.com/qingping/qingping/issues",
   "iot_class": "local_push",
   "quality_scale": "bronze",
   "requirements": [],
+  "homekit": {},
   "ssdp": [],
-  "zeroconf": []
+  "zeroconf": [],
+  "version": "1.0.0"
 }
