@@ -2,20 +2,52 @@
   "config": {
     "step": {
       "user": {
+        "title": "Qingping Device",
+        "description": "Select a discovered device or add manually.",
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "device": "Device"
+        }
+      },
+      "confirm": {
+        "title": "Confirm Device",
+        "description": "MAC: {mac}",
+        "data": {
+          "name": "Name",
+          "model": "Model"
+        }
+      },
+      "manual": {
+        "title": "Add Device Manually",
+        "description": "Enter device MAC address and select model.",
+        "data": {
+          "name": "Name",
+          "mac": "MAC Address",
+          "model": "Model"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Device",
+        "description": "Update settings for {device_name}.",
+        "data": {
+          "model": "Model"
         }
       }
     },
     "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
+      "invalid_mac": "Invalid MAC address format. Use 12 hex characters (e.g. AABBCCDDEEFF)."
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "This device is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Qingping Options",
+        "data": {
+          "model": "Model"
+        }
+      }
     }
   }
 }

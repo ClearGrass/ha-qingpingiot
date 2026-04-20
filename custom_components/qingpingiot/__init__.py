@@ -1,35 +1,48 @@
-"""The qingping integration."""
-
+"""The Qingping IoT integration."""
 from __future__ import annotations
+
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-# TODO List the platforms that you want to support.
-# For your initial PR, limit it to 1 platform.
-_PLATFORMS: list[Platform] = [Platform.LIGHT]
+from .const import DOMAIN, PLATFORMS
 
-# TODO Create ConfigEntry type alias with API object
-# TODO Rename type alias and update all entry annotations
-type New_NameConfigEntry = ConfigEntry[MyApi]  # noqa: F821
+_LOGGER = logging.getLogger(__name__)
 
 
-# TODO Update entry annotation
-async def async_setup_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
-    """Set up qingping from a config entry."""
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Qingping IoT from a config entry."""
+    hass.data.setdefault(DOMAIN, {})
 
-    # TODO 1. Create API instance
-    # TODO 2. Validate the API connection (and authentication)
-    # TODO 3. Store an API object for your platforms to access
-    # entry.runtime_data = MyAPI(...)
+    async def async_update_data():
+        """Fetch data from API endpoint."""
+        return {}
 
-    await hass.config_entries.async_forward_entry_setups(entry, _PLATFORMS)
+    coordinator = DataUpdateCoordinator(
+        hass,
+        _LOGGER,
+        name="qingping",
+        update_method=async_update_data,
+        update_interval=None,
+    )
 
+    await coordinator.async_config_entry_first_refresh()
+
+    hass.data[DOMAIN][entry.entry_id] = {
+        "config": entry.data,
+        "coordinator": coordinator,
+    }
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
-# TODO Update entry annotation
-async def async_unload_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, _PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id)
+    return unload_ok
