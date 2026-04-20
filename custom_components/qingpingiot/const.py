@@ -66,11 +66,23 @@ class Protocol(StrEnum):
     MQTT = "mqtt"
 
 
-# Units
+PERCENTAGE: Final = "%"
 PPM: Final = "ppm"
 PPB: Final = "ppb"
 CONCENTRATION: Final = "µg/m³"
 DB: Final = "dB"
+
+# Report modes (TLV devices)
+CONF_REPORT_MODE: Final = "report_mode"
+REPORT_MODE_HISTORIC: Final = "historic"
+REPORT_MODE_REALTIME: Final = "realtime"
+
+# VOC unit config
+CONF_TVOC_UNIT: Final = "tvoc_unit"
+
+# Online/offline timeouts (seconds)
+OFFLINE_TIMEOUT_REALTIME: Final = 300
+OFFLINE_TIMEOUT_HISTORIC: Final = 900
 
 # TLV intervals
 CONF_REPORT_INTERVAL: Final = "report_interval"  # Minutes (KEY 0x04)
