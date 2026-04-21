@@ -109,7 +109,7 @@ ATTR_UP_ITVL: Final = "up_itvl"
 ATTR_DURATION: Final = "duration"
 
 DEFAULT_TYPE: Final = "12"
-DEFAULT_DURATION: Final = "21600"
+DEFAULT_DURATION: Final = "600"
 
 
 # Device model definitions
