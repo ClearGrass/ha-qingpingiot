@@ -12,6 +12,7 @@ DOMAIN: Final = "qingpingiot"
 
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
+    Platform.NUMBER,
 ]
 
 # Config keys
@@ -69,24 +70,27 @@ class Protocol(StrEnum):
 PERCENTAGE: Final = "%"
 PPM: Final = "ppm"
 PPB: Final = "ppb"
+INDEX: Final = "VOC index"
 CONCENTRATION: Final = "µg/m³"
 DB: Final = "dB"
 
 # Report modes (TLV devices)
 CONF_REPORT_MODE: Final = "report_mode"
-REPORT_MODE_HISTORIC: Final = "historic"
-REPORT_MODE_REALTIME: Final = "realtime"
 
 # VOC unit config
 CONF_TVOC_UNIT: Final = "tvoc_unit"
 
 # Online/offline timeouts (seconds)
-OFFLINE_TIMEOUT_REALTIME: Final = 300
-OFFLINE_TIMEOUT_HISTORIC: Final = 900
+OFFLINE_TIMEOUT_REALTIME: Final = 900
 
 # TLV intervals
 CONF_REPORT_INTERVAL: Final = "report_interval"  # Minutes (KEY 0x04)
 CONF_SAMPLE_INTERVAL: Final = "sample_interval"  # Seconds (KEY 0x05)
+CONF_UPDATE_INTERVAL: Final = "update_interval"  # Seconds (JSON devices)
+
+DEFAULT_REPORT_INTERVAL: Final = 10  # minutes
+DEFAULT_SAMPLE_INTERVAL: Final = 60  # seconds
+DEFAULT_UPDATE_INTERVAL: Final = 60  # seconds
 
 # Offsets
 CONF_TEMPERATURE_OFFSET: Final = "temperature_offset"
@@ -96,20 +100,12 @@ CONF_PM25_OFFSET: Final = "pm25_offset"
 CONF_PM10_OFFSET: Final = "pm10_offset"
 CONF_NOISE_OFFSET: Final = "noise_offset"
 CONF_TVOC_OFFSET: Final = "tvoc_offset"
+CONF_TVOC_INDEX_OFFSET: Final = "tvoc_index_offset"
 CONF_PRESSURE_OFFSET: Final = "pressure_offset"
 
 DEFAULT_OFFSET: Final = 0
 
 # LED indicator
-CONF_LED_INDICATOR: Final = "led_indicator"
-
-# JSON protocol config
-ATTR_TYPE: Final = "type"
-ATTR_UP_ITVL: Final = "up_itvl"
-ATTR_DURATION: Final = "duration"
-
-DEFAULT_TYPE: Final = "12"
-DEFAULT_DURATION: Final = "600"
 
 
 # Device model definitions
@@ -125,7 +121,7 @@ class DeviceModelInfo(TypedDict):
 DEVICE_MODELS: dict[str, DeviceModelInfo] = {
     # -- Robb 室内环境检测仪/Qingping Indoor Environment Monitor --
     "CGR1W": {
-        "name": "青萍室内环境检测仪 (CGR1W/Q5EU1/CGR1C/CGR1L/CGR1LH)",
+        "name": "青萍室内环境检测仪",
         "protocols": [Protocol.MQTT],
         "capabilities": [
             Capability.TEMPERATURE,
@@ -133,7 +129,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.CO2,
             Capability.PM25,
             Capability.PM10,
-            Capability.TVOC,
+            Capability.ETVOC,
             Capability.NOISE,
             Capability.LIGHT,
             Capability.BATTERY,
@@ -141,13 +137,27 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
     },
     # -- Frog S 青萍商用多功能检测仪/Qingping Multi-Role Monitor Pro --
     "CGF2W": {
-        "name": "青萍商用多功能检测仪 (CGF2W/CGF2C/CGF2L/CGF2LH/CGF2P-T40/CGF2P-T40i/CGF2P-TH40/CGF2P-C/CGF2P-HC-F/CGF2P-T70/CGF2P-T200)",
+        "name": "青萍商用多功能检测仪",
         "protocols": [Protocol.MQTT],
         "capabilities": [
             Capability.TEMPERATURE,
             Capability.HUMIDITY,
         ],
     },
+    # Qingping Air Monitor  
+    "CGS2":{
+        "name":"青萍空气检测仪",
+        "protocols": [Protocol.MQTT],
+        "capabilities": [
+            Capability.TEMPERATURE,
+            Capability.HUMIDITY,
+            Capability.CO2,
+            Capability.PM25,
+            Capability.PM10,
+            Capability.NOISE,
+            Capability.BATTERY,
+        ],
+    }
 }
 
 # 用于 config_flow 的下拉选项

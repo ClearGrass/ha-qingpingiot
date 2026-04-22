@@ -27,6 +27,7 @@ from .const import (
     DOMAIN,
     PERCENTAGE,
     PPB,
+    INDEX,
     PPM,
     SENSOR_BATTERY,
     SENSOR_CO2,
@@ -96,7 +97,7 @@ CAPABILITY_SENSOR_MAP: dict[Capability, dict] = {
     Capability.ETVOC: {
         "sensor_type": SENSOR_ETVOC,
         "name": "eTVOC",
-        "unit": None,
+        "unit": INDEX,
         "device_class": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
         "state_class": SensorStateClass.MEASUREMENT,
     },
@@ -344,16 +345,28 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
 
     def _update_from_tlv_data(self, data: dict, top_level: dict) -> None:
         """Update sensor from TLV decoded data."""
+        # _LOGGER.debug(
+        #     "[%s] TLV update sensor=%s, sensor_data=%s, top_level=%s",
+        #     self.coordinator.mac, self._sensor_type, data, top_level,
+        # )
         value = None
 
         if self._sensor_type == SENSOR_BATTERY:
-            value = top_level.get("battery") or data.get("battery")
+            raw = top_level.get("battery") or data.get("battery")
+            if raw is not None and raw >= 255:
+                self._is_unavailable = True
+                self._attr_native_value = None
+                self.async_write_ha_state()
+                return
+            value = raw
         elif self._sensor_type == SENSOR_SIGNAL_STRENGTH:
             value = top_level.get("signalStrength")
             if value is not None and value >= 128:
                 value -= 256
             elif value is None:
                 value = data.get("rssi")
+        elif self._sensor_type == SENSOR_ETVOC:
+            value = data.get("tvoc")
         else:
             value = data.get(self._sensor_type)
 
@@ -375,6 +388,12 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
                 return
         else:
             value = raw
+
+        if self._sensor_type == SENSOR_BATTERY and isinstance(value, int) and value >= 255:
+            self._is_unavailable = True
+            self._attr_native_value = None
+            self.async_write_ha_state()
+            return
 
         if value is not None:
             self._set_value(value)
@@ -405,7 +424,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
     def _update_voc_value(self, raw_value: int) -> None:
         """Update TVOC/eTVOC with unit conversion."""
         model = self.coordinator.model
-        voc_unit = self.coordinator.data.get(CONF_TVOC_UNIT, "ppb")
+        voc_unit = self.coordinator.data.get(CONF_TVOC_UNIT, "index")
 
         if model == "CGS1":
             voc_value = raw_value
@@ -433,7 +452,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
     def icon(self):
         if self._sensor_type == SENSOR_BATTERY:
             charging = self.coordinator.data.get("battery_charging")
-            if charging:
+            if charging or self._attr_native_value is None:
                 return "mdi:battery-charging"
             if self._attr_native_value is not None:
                 level = int(self._attr_native_value)
@@ -449,4 +468,6 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
             return False
         if self._sensor_type in (SENSOR_PM10, SENSOR_PM25):
             return not self._is_unavailable
+        if self._sensor_type == SENSOR_BATTERY and self._is_unavailable:
+            return False
         return True

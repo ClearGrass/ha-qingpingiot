@@ -1,0 +1,81 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "青萍设备",
+        "description": "选择已发现的设备或手动添加。",
+        "data": {
+          "device": "设备"
+        }
+      },
+      "confirm": {
+        "title": "确认设备",
+        "description": "MAC: {mac}",
+        "data": {
+          "name": "名称",
+          "model": "型号"
+        }
+      },
+      "manual": {
+        "title": "手动添加设备",
+        "description": "输入设备 MAC 地址并选择型号。",
+        "data": {
+          "name": "名称",
+          "mac": "MAC 地址",
+          "model": "型号"
+        }
+      },
+      "reconfigure": {
+        "title": "重新配置设备",
+        "description": "更新 {device_name} 的设置。",
+        "data": {
+          "model": "型号"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "MAC 地址格式无效，请使用 12 位十六进制字符（如 AABBCCDDEEFF）。"
+    },
+    "abort": {
+      "already_configured": "该设备已配置。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "青萍选项",
+        "data": {
+          "model": "型号"
+        }
+      }
+    }
+  },
+  "entity": {
+    "number": {
+      "report_interval": {
+        "name": "上报间隔"
+      },
+      "temperature_offset": {
+        "name": "温度补偿"
+      },
+      "humidity_offset": {
+        "name": "湿度补偿"
+      },
+      "co2_offset": {
+        "name": "CO2 补偿"
+      },
+      "pm25_offset": {
+        "name": "PM2.5 补偿"
+      },
+      "pm10_offset": {
+        "name": "PM10 补偿"
+      },
+      "noise_offset": {
+        "name": "噪声补偿"
+      },
+      "tvoc_index_offset": {
+        "name": "eTVOC 指数补偿"
+      }
+    }
+  }
+}

@@ -9,18 +9,15 @@ from typing import Any
 
 from homeassistant.components import mqtt
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
-    DEFAULT_DURATION,
     MQTT_TOPIC_PREFIX,
     OFFLINE_TIMEOUT_REALTIME,
     TLV_MODELS,
 )
-from .tlv import int_to_bytes_little_endian, is_tlv_format, tlv_decode, tlv_encode
+from .tlv import is_tlv_format, tlv_decode
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -88,16 +85,6 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             1,
             encoding=None,
         )
-
-        if self.is_tlv:
-            await self._send_initial_tlv_config()
-
-        async def delayed_publish() -> None:
-            await asyncio.sleep(2)
-            if await ensure_mqtt_connected(self.hass):
-                await self.publish_config()
-
-        asyncio.create_task(delayed_publish())
 
     async def async_stop(self) -> None:
         """Stop MQTT subscription and periodic tasks."""
@@ -229,68 +216,7 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
             self.async_set_updated_data(new_data)
 
-            if new_online and not data.get("online"):
-                asyncio.create_task(self._publish_config_on_recovery())
-
     @callback
     def check_online_status(self) -> None:
         """Periodic online status check (called by timer)."""
         self._update_online_status()
-
-    async def _publish_config_on_recovery(self) -> None:
-        """Re-publish config when device comes back online."""
-        await asyncio.sleep(2)
-        if await ensure_mqtt_connected(self.hass):
-            await self.publish_config()
-
-    # -- Config publishing --
-
-    async def publish_config(self) -> None:
-        """Publish configuration command to device via MQTT."""
-        if not self.hass:
-            return
-
-        topic = f"{MQTT_TOPIC_PREFIX}/{self.mac}/down"
-
-        if self.is_tlv:
-            packets = {0x42: int_to_bytes_little_endian(600, 2)}
-            payload = tlv_encode(0x32, packets)
-        else:
-            payload = json.dumps({
-                "type": "12",
-                "up_itvl": "5",
-                "duration": DEFAULT_DURATION,
-            })
-
-        for attempt in range(MQTT_PUBLISH_RETRY_LIMIT):
-            if not await ensure_mqtt_connected(self.hass):
-                return
-            try:
-                await mqtt.async_publish(self.hass, topic, payload)
-                return
-            except HomeAssistantError as err:
-                _LOGGER.warning(
-                    "[%s] Config publish attempt %d failed: %s",
-                    self.mac, attempt + 1, err,
-                )
-                if attempt < MQTT_PUBLISH_RETRY_LIMIT - 1:
-                    await asyncio.sleep(MQTT_PUBLISH_RETRY_DELAY)
-
-    # -- Initial TLV config --
-
-    async def _send_initial_tlv_config(self) -> None:
-        """Send initial config to a new TLV device."""
-        native_temp_unit = self.hass.config.units.temperature_unit
-        temp_unit = "fahrenheit" if native_temp_unit == UnitOfTemperature.FAHRENHEIT else "celsius"
-
-        packets = {
-            0x42: int_to_bytes_little_endian(600, 2),
-            0x19: bytes([1 if temp_unit == "fahrenheit" else 0]),
-        }
-
-        # if self.model == "CGP22C":
-        #     packets[0x3C] = int_to_bytes_little_endian(10, 2)
-
-        payload = tlv_encode(0x32, packets)
-        await mqtt.async_publish(self.hass, f"qingping/{self.mac}/down", payload)
-        _LOGGER.info("[%s] Initial TLV config sent", self.mac)

@@ -49,5 +49,33 @@
         }
       }
     }
+  },
+  "entity": {
+    "number": {
+      "report_interval": {
+        "name": "Report interval"
+      },
+      "temperature_offset": {
+        "name": "Temperature offset"
+      },
+      "humidity_offset": {
+        "name": "Humidity offset"
+      },
+      "co2_offset": {
+        "name": "CO2 offset"
+      },
+      "pm25_offset": {
+        "name": "PM2.5 offset"
+      },
+      "pm10_offset": {
+        "name": "PM10 offset"
+      },
+      "noise_offset": {
+        "name": "Noise offset"
+      },
+      "tvoc_index_offset": {
+        "name": "eTVOC index offset"
+      }
+    }
   }
 }
