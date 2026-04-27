@@ -13,6 +13,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .coordinator import QingpingCoordinator
 from .const import (
     CONF_REPORT_INTERVAL,
     CONF_TEMPERATURE_OFFSET,
@@ -76,7 +77,7 @@ async def async_setup_entry(
     mac = config_entry.data[CONF_MAC]
     name = config_entry.data[CONF_NAME]
     model = config_entry.data[CONF_MODEL]
-    coordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
+    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},
@@ -117,7 +118,7 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "report_interval"
 
-    def __init__(self, coordinator, config_entry, mac, model, device_info):
+    def __init__(self, coordinator: QingpingCoordinator, config_entry: ConfigEntry, mac: str, model: str, device_info: dict) -> None:
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
@@ -189,9 +190,9 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
 
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator, config_entry, mac, model, device_info,
-                 conf_key, translation_key, unit, tlv_key, json_key,
-                 min_value, max_value, step):
+    def __init__(self, coordinator: QingpingCoordinator, config_entry: ConfigEntry, mac: str, model: str, device_info: dict,
+                 conf_key: str, translation_key: str, unit: str, tlv_key: int | None, json_key: str,
+                 min_value: float, max_value: float, step: float) -> None:
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac

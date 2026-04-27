@@ -132,7 +132,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.ETVOC,
             Capability.NOISE,
             Capability.LIGHT,
-            Capability.BATTERY,
+            Capability.SIGNAL_STRENGTH,
         ],
     },
     # -- Frog S 青萍商用多功能检测仪/Qingping Multi-Role Monitor Pro --
