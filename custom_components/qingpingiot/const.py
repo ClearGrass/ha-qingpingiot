@@ -14,6 +14,8 @@ PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.NUMBER,
     Platform.SELECT,
+    Platform.SWITCH,
+    Platform.BUTTON,
 ]
 
 # Config keys
@@ -135,6 +137,9 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.NOISE,
             Capability.LIGHT,
             Capability.SIGNAL_STRENGTH,
+            Capability.CO2_ASC,
+            Capability.CO2_CALIBRATION,
+            Capability.LED_INDICATOR,
         ],
     },
     # -- Frog S 青萍商用多功能检测仪/Qingping Multi-Role Monitor Pro --

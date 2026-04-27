@@ -86,6 +86,19 @@
           "mg/m³": "mg/m³"
         }
       }
+    },
+    "switch": {
+      "co2_asc": {
+        "name": "CO2 自动校准"
+      },
+      "led_indicator": {
+        "name": "LED 指示灯"
+      }
+    },
+    "button": {
+      "co2_calibration": {
+        "name": "CO2 手动校准"
+      }
     }
   }
 }
