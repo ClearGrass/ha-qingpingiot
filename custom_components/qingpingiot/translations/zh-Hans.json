@@ -76,6 +76,16 @@
       "tvoc_index_offset": {
         "name": "eTVOC 指数补偿"
       }
+    },
+    "select": {
+      "etvoc_unit": {
+        "name": "eTVOC 单位",
+        "state": {
+          "index": "VOC 指数",
+          "ppb": "ppb",
+          "mg/m³": "mg/m³"
+        }
+      }
     }
   }
 }

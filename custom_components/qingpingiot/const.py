@@ -13,6 +13,7 @@ DOMAIN: Final = "qingpingiot"
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.NUMBER,
+    Platform.SELECT,
 ]
 
 # Config keys
@@ -79,6 +80,7 @@ CONF_REPORT_MODE: Final = "report_mode"
 
 # VOC unit config
 CONF_TVOC_UNIT: Final = "tvoc_unit"
+CONF_ETVOC_UNIT: Final = "etvoc_unit"
 
 # Online/offline timeouts (seconds)
 OFFLINE_TIMEOUT_REALTIME: Final = 900
@@ -144,7 +146,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.HUMIDITY,
         ],
     },
-    # Qingping Air Monitor  
+    # Qingping Air Monitor
     "CGS2":{
         "name":"青萍空气检测仪",
         "protocols": [Protocol.MQTT],
@@ -156,6 +158,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.PM10,
             Capability.NOISE,
             Capability.BATTERY,
+            Capability.ETVOC,
         ],
     }
 }
