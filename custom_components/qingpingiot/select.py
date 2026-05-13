@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     CONF_ETVOC_UNIT,
+    CONF_TEMPERATURE_UNIT,
     DOMAIN,
     MQTT_TOPIC_PREFIX,
     TLV_MODELS,
@@ -26,10 +27,13 @@ from .tlv import tlv_encode
 _LOGGER = logging.getLogger(__name__)
 
 ETVOC_UNIT_OPTIONS = ["index", "ppb", "mg/m³"]
+TEMPERATURE_UNIT_OPTIONS = ["°C", "°F"]
 
-# Capability -> select config: (conf_key, translation_key, unit_options)
-CAPABILITY_SELECT_MAP: dict[Capability, tuple[str, str, list[str]]] = {
-    Capability.ETVOC: (CONF_ETVOC_UNIT, "etvoc_unit", ETVOC_UNIT_OPTIONS),
+
+# Capability -> (conf_key, translation_key, options, entity_class)
+CAPABILITY_SELECT_MAP: dict[Capability, tuple[str, str, list[str], type]] = {
+    Capability.ETVOC: (CONF_ETVOC_UNIT, "etvoc_unit", ETVOC_UNIT_OPTIONS, "etvoc"),
+    Capability.TEMPERATURE_UNIT: (CONF_TEMPERATURE_UNIT, "temperature_unit", TEMPERATURE_UNIT_OPTIONS, "temperature"),
 }
 
 
@@ -60,13 +64,21 @@ async def async_setup_entry(
     for cap in model_info["capabilities"]:
         if cap not in CAPABILITY_SELECT_MAP:
             continue
-        conf_key, translation_key, options = CAPABILITY_SELECT_MAP[cap]
-        entities.append(
-            QingpingTLVeTVOCUnitSelect(
-                coordinator, config_entry, mac, device_info,
-                conf_key, translation_key, options,
+        conf_key, translation_key, options, entity_type = CAPABILITY_SELECT_MAP[cap]
+        if entity_type == "etvoc":
+            entities.append(
+                QingpingTLVeTVOCUnitSelect(
+                    coordinator, config_entry, mac, device_info,
+                    conf_key, translation_key, options,
+                )
             )
-        )
+        elif entity_type == "temperature":
+            entities.append(
+                QingpingTLVTemperatureUnitSelect(
+                    coordinator, config_entry, mac, device_info,
+                    conf_key, translation_key, options,
+                )
+            )
 
     async_add_entities(entities)
 
@@ -120,6 +132,69 @@ class QingpingTLVeTVOCUnitSelect(CoordinatorEntity, SelectEntity):
         topic = f"{MQTT_TOPIC_PREFIX}/{self._mac}/down"
         await mqtt.async_publish(self.hass, topic, payload)
         _LOGGER.debug("[%s] Sent TLV %s=%s (key=0x62, val=%d)", self._mac, self._conf_key, option, tlv_value)
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self._handle_coordinator_update()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        if self._conf_key not in self.coordinator.data:
+            self.coordinator.data[self._conf_key] = self._config_entry.data.get(
+                self._conf_key, self._attr_options[0]
+            )
+        self.async_write_ha_state()
+
+
+class QingpingTLVTemperatureUnitSelect(CoordinatorEntity, SelectEntity):
+    """Select entity for temperature unit on TLV devices."""
+
+    _attr_has_entity_name = True
+
+    # TLV KEY 0x19: 0x00=Celsius, 0x01=Fahrenheit
+    _TLV_UNIT_MAP = {"°C": 0x00, "°F": 0x01}
+
+    def __init__(
+        self,
+        coordinator: QingpingCoordinator,
+        config_entry: ConfigEntry,
+        mac: str,
+        device_info: dict,
+        conf_key: str,
+        translation_key: str,
+        options: list[str],
+    ) -> None:
+        super().__init__(coordinator)
+        self._config_entry = config_entry
+        self._mac = mac
+        self._conf_key = conf_key
+        self._attr_translation_key = translation_key
+        self._attr_unique_id = f"{mac}_{conf_key}"
+        self._attr_device_info = device_info
+        self._attr_options = options
+        self._attr_entity_category = EntityCategory.CONFIG
+        self._attr_icon = "mdi:thermometer"
+
+    @property
+    def current_option(self) -> str | None:
+        return self.coordinator.data.get(self._conf_key, self._attr_options[0])
+
+    async def async_select_option(self, option: str) -> None:
+        self.coordinator.data[self._conf_key] = option
+        self.async_write_ha_state()
+
+        new_data = dict(self._config_entry.data)
+        new_data[self._conf_key] = option
+        self.hass.config_entries.async_update_entry(self._config_entry, data=new_data)
+
+        await self.coordinator.async_request_refresh()
+
+        tlv_value = self._TLV_UNIT_MAP.get(option, 0x00)
+        packets = {0x19: bytes([tlv_value])}
+        payload = tlv_encode(0x32, packets)
+        topic = f"{MQTT_TOPIC_PREFIX}/{self._mac}/down"
+        await mqtt.async_publish(self.hass, topic, payload)
+        _LOGGER.debug("[%s] Sent TLV %s=%s (key=0x19, val=%d)", self._mac, self._conf_key, option, tlv_value)
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()

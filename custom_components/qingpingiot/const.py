@@ -61,6 +61,7 @@ class Capability(StrEnum):
     CO2_ASC = "co2_asc"
     CO2_CALIBRATION = "co2_calibration"
     LED_INDICATOR = "led_indicator"
+    TEMPERATURE_UNIT = "temperature_unit"
 
 
 class Protocol(StrEnum):
@@ -83,6 +84,9 @@ CONF_REPORT_MODE: Final = "report_mode"
 # VOC unit config
 CONF_TVOC_UNIT: Final = "tvoc_unit"
 CONF_ETVOC_UNIT: Final = "etvoc_unit"
+
+# Temperature unit config (TLV)
+CONF_TEMPERATURE_UNIT: Final = "temperature_unit"
 
 # Online/offline timeouts (seconds)
 OFFLINE_TIMEOUT_REALTIME: Final = 900
@@ -133,13 +137,13 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.CO2,
             Capability.PM25,
             Capability.PM10,
-            Capability.ETVOC,
             Capability.NOISE,
             Capability.LIGHT,
             Capability.SIGNAL_STRENGTH,
             Capability.CO2_ASC,
             Capability.CO2_CALIBRATION,
             Capability.LED_INDICATOR,
+            Capability.TEMPERATURE_UNIT,
         ],
     },
     # -- Frog S 青萍商用多功能检测仪/Qingping Multi-Role Monitor Pro --
@@ -163,6 +167,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.PM10,
             Capability.NOISE,
             Capability.BATTERY,
+            Capability.ETVOC,
         ],
     }
 }

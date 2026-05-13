@@ -85,6 +85,13 @@
           "ppb": "ppb",
           "mg/m³": "mg/m³"
         }
+      },
+      "temperature_unit": {
+        "name": "温度单位",
+        "state": {
+          "°C": "°C",
+          "°F": "°F"
+        }
       }
     },
     "switch": {

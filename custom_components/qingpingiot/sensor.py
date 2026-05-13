@@ -53,9 +53,7 @@ CAPABILITY_SENSOR_MAP: dict[Capability, dict] = {
     Capability.TEMPERATURE: {
         "sensor_type": SENSOR_TEMPERATURE,
         "name": "Temperature",
-        "unit_fn": lambda hass: UnitOfTemperature.FAHRENHEIT
-        if hass.config.units.temperature_unit == UnitOfTemperature.FAHRENHEIT
-        else UnitOfTemperature.CELSIUS,
+        "unit": UnitOfTemperature.CELSIUS,
         "device_class": SensorDeviceClass.TEMPERATURE,
         "state_class": SensorStateClass.MEASUREMENT,
     },
@@ -190,7 +188,7 @@ async def async_setup_entry(
         if desc.get("tlv_only") and not is_tlv:
             continue
 
-        unit = desc.get("unit") or desc.get("unit_fn", lambda h: None)(hass)
+        unit = desc.get("unit")
         entity_category = desc.get("entity_category")
 
         sensor = QingpingSensor(
@@ -402,11 +400,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         """Convert and set sensor value."""
         try:
             if self._sensor_type == SENSOR_TEMPERATURE:
-                temp_c = float(value)
-                if self._attr_native_unit_of_measurement == UnitOfTemperature.FAHRENHEIT:
-                    self._attr_native_value = round(temp_c * 9 / 5 + 32, 1)
-                else:
-                    self._attr_native_value = round(temp_c, 1)
+                self._attr_native_value = round(float(value), 1)
             elif self._sensor_type == SENSOR_HUMIDITY:
                 self._attr_native_value = round(float(value), 1)
             elif self._sensor_type == SENSOR_PRESSURE:
