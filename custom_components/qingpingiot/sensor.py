@@ -48,81 +48,81 @@ from .coordinator import QingpingCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 
-# Capability → Sensor description mapping
+# Capability -> Sensor description mapping
 CAPABILITY_SENSOR_MAP: dict[Capability, dict] = {
     Capability.TEMPERATURE: {
         "sensor_type": SENSOR_TEMPERATURE,
-        "name": "Temperature",
+        "translation_key": "temperature",
         "unit": UnitOfTemperature.CELSIUS,
         "device_class": SensorDeviceClass.TEMPERATURE,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.HUMIDITY: {
         "sensor_type": SENSOR_HUMIDITY,
-        "name": "Humidity",
+        "translation_key": "humidity",
         "unit": PERCENTAGE,
         "device_class": SensorDeviceClass.HUMIDITY,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.CO2: {
         "sensor_type": SENSOR_CO2,
-        "name": "CO2",
+        "translation_key": "co2",
         "unit": PPM,
         "device_class": SensorDeviceClass.CO2,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.PM25: {
         "sensor_type": SENSOR_PM25,
-        "name": "PM2.5",
+        "translation_key": "pm25",
         "unit": CONCENTRATION,
         "device_class": SensorDeviceClass.PM25,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.PM10: {
         "sensor_type": SENSOR_PM10,
-        "name": "PM10",
+        "translation_key": "pm10",
         "unit": CONCENTRATION,
         "device_class": SensorDeviceClass.PM10,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.TVOC: {
         "sensor_type": SENSOR_TVOC,
-        "name": "TVOC",
+        "translation_key": "tvoc",
         "unit": PPB,
         "device_class": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.ETVOC: {
         "sensor_type": SENSOR_ETVOC,
-        "name": "eTVOC",
+        "translation_key": "etvoc",
         "unit": INDEX,
         "device_class": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.NOISE: {
         "sensor_type": SENSOR_NOISE,
-        "name": "Noise",
+        "translation_key": "noise",
         "unit": DB,
         "device_class": SensorDeviceClass.SOUND_PRESSURE,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.PRESSURE: {
         "sensor_type": SENSOR_PRESSURE,
-        "name": "Pressure",
+        "translation_key": "pressure",
         "unit": "kPa",
         "device_class": SensorDeviceClass.PRESSURE,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.LIGHT: {
         "sensor_type": SENSOR_LIGHT,
-        "name": "Light",
+        "translation_key": "light",
         "unit": "lx",
         "device_class": SensorDeviceClass.ILLUMINANCE,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.BATTERY: {
         "sensor_type": SENSOR_BATTERY,
-        "name": "Battery",
+        "translation_key": "battery",
         "unit": PERCENTAGE,
         "device_class": SensorDeviceClass.BATTERY,
         "state_class": SensorStateClass.MEASUREMENT,
@@ -130,7 +130,7 @@ CAPABILITY_SENSOR_MAP: dict[Capability, dict] = {
     },
     Capability.SIGNAL_STRENGTH: {
         "sensor_type": SENSOR_SIGNAL_STRENGTH,
-        "name": "Signal Strength",
+        "translation_key": "signal_strength",
         "unit": "dBm",
         "device_class": SensorDeviceClass.SIGNAL_STRENGTH,
         "state_class": SensorStateClass.MEASUREMENT,
@@ -194,7 +194,7 @@ async def async_setup_entry(
         sensor = QingpingSensor(
             coordinator=coordinator,
             sensor_type=desc["sensor_type"],
-            friendly_name=desc["name"],
+            translation_key=desc["translation_key"],
             unit=unit,
             device_class=desc["device_class"],
             state_class=desc["state_class"],
@@ -220,11 +220,12 @@ async def async_setup_entry(
 class QingpingStatusSensor(CoordinatorEntity, SensorEntity):
     """Device online/offline status."""
 
+    _attr_has_entity_name = True
+    _attr_translation_key = "status"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: QingpingCoordinator, device_info: dict) -> None:
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.name} Status"
         self._attr_unique_id = f"{coordinator.mac}_status"
         self._attr_device_info = device_info
 
@@ -236,11 +237,12 @@ class QingpingStatusSensor(CoordinatorEntity, SensorEntity):
 class QingpingFirmwareSensor(CoordinatorEntity, SensorEntity):
     """Device firmware version."""
 
+    _attr_has_entity_name = True
+    _attr_translation_key = "firmware"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: QingpingCoordinator, device_info: dict) -> None:
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.name} Firmware"
         self._attr_unique_id = f"{coordinator.mac}_firmware"
         self._attr_device_info = device_info
 
@@ -252,11 +254,12 @@ class QingpingFirmwareSensor(CoordinatorEntity, SensorEntity):
 class QingpingMACSensor(CoordinatorEntity, SensorEntity):
     """Device MAC address."""
 
+    _attr_has_entity_name = True
+    _attr_translation_key = "mac"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: QingpingCoordinator, device_info: dict) -> None:
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.name} MAC Address"
         self._attr_unique_id = f"{coordinator.mac}_mac"
         self._attr_device_info = device_info
 
@@ -268,11 +271,12 @@ class QingpingMACSensor(CoordinatorEntity, SensorEntity):
 class QingpingBatteryStateSensor(CoordinatorEntity, SensorEntity):
     """Battery charging state."""
 
+    _attr_has_entity_name = True
+    _attr_translation_key = "battery_state"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: QingpingCoordinator, device_info: dict) -> None:
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.name} Battery State"
         self._attr_unique_id = f"{coordinator.mac}_battery_state"
         self._attr_device_info = device_info
 
@@ -303,11 +307,13 @@ def _get_voc_device_class(unit: str | None) -> SensorDeviceClass:
 class QingpingSensor(CoordinatorEntity, SensorEntity):
     """Generic Qingping sensor entity."""
 
+    _attr_has_entity_name = True
+
     def __init__(
         self,
         coordinator: QingpingCoordinator,
         sensor_type: str,
-        friendly_name: str,
+        translation_key: str,
         unit: str | None,
         device_class: SensorDeviceClass,
         state_class: SensorStateClass,
@@ -318,7 +324,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         self._sensor_type = sensor_type
         self._is_unavailable = False
 
-        self._attr_name = f"{coordinator.name} {friendly_name}"
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{coordinator.mac}_{sensor_type}"
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
@@ -343,10 +349,6 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
 
     def _update_from_tlv_data(self, data: dict, top_level: dict) -> None:
         """Update sensor from TLV decoded data."""
-        # _LOGGER.debug(
-        #     "[%s] TLV update sensor=%s, sensor_data=%s, top_level=%s",
-        #     self.coordinator.mac, self._sensor_type, data, top_level,
-        # )
         value = None
 
         if self._sensor_type == SENSOR_BATTERY:

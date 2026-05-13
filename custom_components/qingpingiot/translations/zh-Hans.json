@@ -51,6 +51,56 @@
     }
   },
   "entity": {
+    "sensor": {
+      "temperature": {
+        "name": "温度"
+      },
+      "humidity": {
+        "name": "相对湿度"
+      },
+      "co2": {
+        "name": "CO2"
+      },
+      "pm25": {
+        "name": "PM2.5"
+      },
+      "pm10": {
+        "name": "PM10"
+      },
+      "tvoc": {
+        "name": "TVOC"
+      },
+      "etvoc": {
+        "name": "eTVOC"
+      },
+      "noise": {
+        "name": "噪音"
+      },
+      "pressure": {
+        "name": "压力"
+      },
+      "light": {
+        "name": "光照强度"
+      },
+      "battery": {
+        "name": "电池"
+      },
+      "signal_strength": {
+        "name": "信号"
+      },
+      "status": {
+        "name": "状态"
+      },
+      "firmware": {
+        "name": "固件版本"
+      },
+      "mac": {
+        "name": "MAC 地址"
+      },
+      "battery_state": {
+        "name": "电池状态"
+      }
+    },
     "number": {
       "report_interval": {
         "name": "上报间隔"
@@ -99,7 +149,7 @@
         "name": "CO2 自动校准"
       },
       "led_indicator": {
-        "name": "LED 指示灯"
+        "name": "读数评价灯"
       }
     },
     "button": {

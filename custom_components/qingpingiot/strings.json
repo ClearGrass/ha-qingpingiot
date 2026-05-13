@@ -51,30 +51,110 @@
     }
   },
   "entity": {
+    "sensor": {
+      "temperature": {
+        "name": "Temperature"
+      },
+      "humidity": {
+        "name": "Relative Humidity"
+      },
+      "co2": {
+        "name": "CO2"
+      },
+      "pm25": {
+        "name": "PM2.5"
+      },
+      "pm10": {
+        "name": "PM10"
+      },
+      "tvoc": {
+        "name": "TVOC"
+      },
+      "etvoc": {
+        "name": "eTVOC"
+      },
+      "noise": {
+        "name": "Noise"
+      },
+      "pressure": {
+        "name": "Pressure"
+      },
+      "light": {
+        "name": "Light"
+      },
+      "battery": {
+        "name": "Battery"
+      },
+      "signal_strength": {
+        "name": "Signal Strength"
+      },
+      "status": {
+        "name": "Status"
+      },
+      "firmware": {
+        "name": "Firmware"
+      },
+      "mac": {
+        "name": "MAC Address"
+      },
+      "battery_state": {
+        "name": "Battery State"
+      }
+    },
     "number": {
       "report_interval": {
-        "name": "Report interval"
+        "name": "Interval of Uploading"
       },
       "temperature_offset": {
-        "name": "Temperature offset"
+        "name": "Temp Compensation"
       },
       "humidity_offset": {
-        "name": "Humidity offset"
+        "name": "Humidity Compensation"
       },
       "co2_offset": {
-        "name": "CO2 offset"
+        "name": "CO2 Compensation"
       },
       "pm25_offset": {
-        "name": "PM2.5 offset"
+        "name": "PM2.5 Compensation"
       },
       "pm10_offset": {
-        "name": "PM10 offset"
+        "name": "PM10 Compensation"
       },
       "noise_offset": {
-        "name": "Noise offset"
+        "name": "Noise Compensation"
       },
       "tvoc_index_offset": {
-        "name": "eTVOC index offset"
+        "name": "eTVOC index Compensation"
+      }
+    },
+    "select": {
+      "etvoc_unit": {
+        "name": "eTVOC Unit",
+        "state": {
+          "index": "VOC Index",
+          "ppb": "ppb",
+          "mg/m³": "mg/m³"
+        }
+      },
+      "temperature_unit": {
+        "name": "Temperature Unit",
+        "state": {
+          "°C": "°C",
+          "°F": "°F"
+        }
+      }
+    },
+    "switch": {
+      "co2_asc": {
+        "name": "CO2 Auto Self-Calibration"
+      },
+      "led_indicator": {
+        "name": "Rating Light"
+      }
+    },
+    "button": {
+      "co2_calibration": {
+        "name": "CO2 Manual Calibration"
       }
     }
   }
