@@ -21,7 +21,7 @@ from datetime import timedelta
 from .const import (
     Capability,
     CONCENTRATION,
-    CONF_TVOC_UNIT,
+    CONF_ETVOC_UNIT,
     DB,
     DEVICE_MODELS,
     DOMAIN,
@@ -416,30 +416,21 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
             _LOGGER.error("Invalid value for %s: %s", self._sensor_type, value)
 
     def _update_voc_value(self, raw_value: int) -> None:
-        """Update TVOC/eTVOC with unit conversion."""
-        model = self.coordinator.model
-        voc_unit = self.coordinator.data.get(CONF_TVOC_UNIT, "index")
+        """Update eTVOC with unit conversion."""
+        voc_unit = self.coordinator.data.get(CONF_ETVOC_UNIT, "index")
 
-        if model == "CGS1":
-            voc_value = raw_value
-            if voc_unit == "ppm":
-                voc_value /= 1000
-            elif voc_unit == "mg/m³":
-                voc_value /= 218.77
-            self._attr_native_value = round(voc_value, 3)
-            self._attr_native_unit_of_measurement = voc_unit
+        if voc_unit == "ppb":
+            voc_value = (math.log(501 - raw_value) - 6.24) * -2215.4
+            voc_value = int(round(float(voc_value), 0))
+        elif voc_unit == "mg/m³":
+            voc_value = (math.log(501 - raw_value) - 6.24) * -2215.4
+            voc_value = (voc_value * 4.5 * 10 + 5) / 10 / 1000
+            voc_value = round(voc_value, 3)
         else:
             voc_value = raw_value
-            if voc_unit == "ppb":
-                voc_value = (math.log(501 - voc_value) - 6.24) * -2215.4
-                voc_value = int(round(float(voc_value), 0))
-            elif voc_unit == "mg/m³":
-                voc_value = (math.log(501 - voc_value) - 6.24) * -2215.4
-                voc_value = (voc_value * 4.5 * 10 + 5) / 10 / 1000
-                voc_value = round(voc_value, 3)
-            self._attr_native_value = voc_value
-            self._attr_native_unit_of_measurement = None if voc_unit == "index" else voc_unit
 
+        self._attr_native_value = voc_value
+        self._attr_native_unit_of_measurement = None if voc_unit == "index" else voc_unit
         self._attr_device_class = _get_voc_device_class(voc_unit)
 
     @property
