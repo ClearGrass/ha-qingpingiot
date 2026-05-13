@@ -163,7 +163,6 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.PM10,
             Capability.NOISE,
             Capability.BATTERY,
-            Capability.ETVOC,
         ],
     }
 }

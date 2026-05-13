@@ -119,6 +119,7 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             cmd = payload[2] if len(payload) > 2 else 0
             decoded = tlv_decode(payload)
+            _LOGGER.debug("[%s] TLV payload: %s, decoded: %s", self.mac, payload.hex(), decoded)
             if not decoded:
                 return
 
@@ -158,6 +159,7 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def _handle_json_message(self, payload: bytes) -> None:
         """Process JSON payload (legacy devices)."""
         payload_dict = json.loads(payload)
+        _LOGGER.debug("[%s] JSON payload: %s", self.mac, payload_dict)
         if not isinstance(payload_dict, dict):
             return
 
