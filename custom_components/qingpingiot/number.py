@@ -18,10 +18,10 @@ from .const import (
     CONF_TEMPERATURE_OFFSET,
     CONF_HUMIDITY_OFFSET,
     CONF_CO2_OFFSET,
-    CONF_PM25_OFFSET,
-    CONF_PM10_OFFSET,
-    CONF_NOISE_OFFSET,
-    CONF_TVOC_INDEX_OFFSET,
+    # CONF_PM25_OFFSET,
+    # CONF_PM10_OFFSET,
+    # CONF_NOISE_OFFSET,
+    # CONF_TVOC_INDEX_OFFSET,
     DEFAULT_REPORT_INTERVAL,
     DEFAULT_OFFSET,
     DOMAIN,
@@ -50,22 +50,22 @@ OFFSET_DEFS = {
         CONF_CO2_OFFSET, "co2_offset", "ppm",
         0x45, -500, 500, 1, "co2_offset",
     ),
-    Capability.PM25: (
-        CONF_PM25_OFFSET, "pm25_offset", "µg/m³",
-        0x4B, -500, 500, 1, "pm25_offset",
-    ),
-    Capability.PM10: (
-        CONF_PM10_OFFSET, "pm10_offset", "µg/m³",
-        0x4D, -500, 500, 1, "pm10_offset",
-    ),
-    Capability.NOISE: (
-        CONF_NOISE_OFFSET, "noise_offset", "dB",
-        None, -10, 10, 0.1, "noise_offset",
-    ),
-    Capability.ETVOC: (
-        CONF_TVOC_INDEX_OFFSET, "tvoc_index_offset", "",
-        None, -500, 500, 1, "tvoc_index_offset",
-    ),
+    # Capability.PM25: (
+    #     CONF_PM25_OFFSET, "pm25_offset", "µg/m³",
+    #     0x4B, -500, 500, 1, "pm25_offset",
+    # ),
+    # Capability.PM10: (
+    #     CONF_PM10_OFFSET, "pm10_offset", "µg/m³",
+    #     0x4D, -500, 500, 1, "pm10_offset",
+    # ),
+    # Capability.NOISE: (
+    #     CONF_NOISE_OFFSET, "noise_offset", "dB",
+    #     None, -10, 10, 0.1, "noise_offset",
+    # ),
+    # Capability.ETVOC: (
+    #     CONF_TVOC_INDEX_OFFSET, "tvoc_index_offset", "",
+    #     None, -500, 500, 1, "tvoc_index_offset",
+    # ),
 }
 
 
