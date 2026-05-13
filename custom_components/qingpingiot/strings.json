@@ -50,6 +50,20 @@
       }
     }
   },
+  "selector": {
+    "device": {
+      "options": {
+        "manual": "Manually add a device"
+      }
+    },
+    "model": {
+      "options": {
+        "CGR1W": "Qingping Indoor Environment Monitor",
+        "CGF2W": "Qingping Multi-Role Monitor Pro",
+        "CGS2": "Qingping Air Monitor"
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "temperature": {
@@ -89,7 +103,11 @@
         "name": "Signal Strength"
       },
       "status": {
-        "name": "Status"
+        "name": "Status",
+        "state": {
+          "online": "Online",
+          "offline": "Offline"
+        }
       },
       "firmware": {
         "name": "Firmware"
@@ -98,7 +116,12 @@
         "name": "MAC Address"
       },
       "battery_state": {
-        "name": "Battery State"
+        "name": "Battery State",
+        "state": {
+          "charging": "Charging",
+          "discharging": "Discharging",
+          "unknown": "Unknown"
+        }
       }
     },
     "number": {

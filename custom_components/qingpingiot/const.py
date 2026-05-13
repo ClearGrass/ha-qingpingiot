@@ -129,7 +129,7 @@ class DeviceModelInfo(TypedDict):
 DEVICE_MODELS: dict[str, DeviceModelInfo] = {
     # -- Robb 室内环境检测仪/Qingping Indoor Environment Monitor --
     "CGR1W": {
-        "name": "青萍室内环境检测仪",
+        "name": "Qingping Indoor Environment Monitor",
         "protocols": [Protocol.MQTT],
         "capabilities": [
             Capability.TEMPERATURE,
@@ -148,7 +148,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
     },
     # -- Frog S 青萍商用多功能检测仪/Qingping Multi-Role Monitor Pro --
     "CGF2W": {
-        "name": "青萍商用多功能检测仪",
+        "name": "Qingping Multi-Role Monitor Pro",
         "protocols": [Protocol.MQTT],
         "capabilities": [
             Capability.TEMPERATURE,
@@ -157,7 +157,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
     },
     # Qingping Air Monitor
     "CGS2":{
-        "name":"青萍空气检测仪",
+        "name":"Qingping Air Monitor",
         "protocols": [Protocol.MQTT],
         "capabilities": [
             Capability.TEMPERATURE,
@@ -174,7 +174,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
 
 # 用于 config_flow 的下拉选项
 MODEL_OPTIONS: Final = [
-    {"label": info["name"], "value": model}
+    {"value": model, "label": info["name"]}
     for model, info in DEVICE_MODELS.items()
 ]
 

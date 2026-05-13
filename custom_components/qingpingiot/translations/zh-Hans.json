@@ -50,6 +50,20 @@
       }
     }
   },
+  "selector": {
+    "device": {
+      "options": {
+        "manual": "手动添加设备"
+      }
+    },
+    "model": {
+      "options": {
+        "CGR1W": "青萍室内环境检测仪",
+        "CGF2W": "青萍商用多功能检测仪",
+        "CGS2": "青萍空气检测仪"
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "temperature": {
@@ -89,7 +103,11 @@
         "name": "信号"
       },
       "status": {
-        "name": "状态"
+        "name": "状态",
+        "state": {
+          "online": "在线",
+          "offline": "离线"
+        }
       },
       "firmware": {
         "name": "固件版本"
@@ -98,7 +116,12 @@
         "name": "MAC 地址"
       },
       "battery_state": {
-        "name": "电池状态"
+        "name": "电池状态",
+        "state": {
+          "charging": "充电中",
+          "discharging": "放电中",
+          "unknown": "未知"
+        }
       }
     },
     "number": {

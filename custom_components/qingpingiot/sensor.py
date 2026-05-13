@@ -284,10 +284,10 @@ class QingpingBatteryStateSensor(CoordinatorEntity, SensorEntity):
     def native_value(self) -> str:
         charging = self.coordinator.data.get("battery_charging")
         if charging is True:
-            return "Charging"
+            return "charging"
         if charging is False:
-            return "Discharging"
-        return "Unknown"
+            return "discharging"
+        return "unknown"
 
 
 # -- Main Sensor Entity --

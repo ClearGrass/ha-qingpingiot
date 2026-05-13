@@ -99,6 +99,7 @@ class QingpingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         SelectSelectorConfig(
                             options=device_options,
                             mode=SelectSelectorMode.LIST,
+                            translation_key="device",
                         )
                     ),
                 }
@@ -133,6 +134,7 @@ class QingpingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         SelectSelectorConfig(
                             options=MODEL_OPTIONS,
                             mode=SelectSelectorMode.LIST,
+                            translation_key="model",
                         )
                     ),
                 }
@@ -175,6 +177,7 @@ class QingpingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         SelectSelectorConfig(
                             options=MODEL_OPTIONS,
                             mode=SelectSelectorMode.LIST,
+                            translation_key="model",
                         )
                     ),
                 }
@@ -204,6 +207,7 @@ class QingpingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         SelectSelectorConfig(
                             options=MODEL_OPTIONS,
                             mode=SelectSelectorMode.LIST,
+                            translation_key="model",
                         )
                     ),
                 }
@@ -309,6 +313,7 @@ class QingpingOptionsFlow(config_entries.OptionsFlowWithReload):
                         SelectSelectorConfig(
                             options=MODEL_OPTIONS,
                             mode=SelectSelectorMode.LIST,
+                            translation_key="model",
                         )
                     ),
                 }
