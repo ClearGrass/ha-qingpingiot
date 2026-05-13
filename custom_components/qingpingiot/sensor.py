@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import math
+from datetime import timedelta
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -16,7 +17,6 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from datetime import timedelta
 
 from .const import (
     Capability,
@@ -25,9 +25,9 @@ from .const import (
     DB,
     DEVICE_MODELS,
     DOMAIN,
+    INDEX,
     PERCENTAGE,
     PPB,
-    INDEX,
     PPM,
     SENSOR_BATTERY,
     SENSOR_CO2,
@@ -319,7 +319,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         state_class: SensorStateClass,
         device_info: dict,
         entity_category: EntityCategory | None = None,
-    ):
+    ) -> None:
         super().__init__(coordinator)
         self._sensor_type = sensor_type
         self._is_unavailable = False
@@ -398,7 +398,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         if value is not None:
             self._set_value(value)
 
-    def _set_value(self, value) -> None:
+    def _set_value(self, value: int | float) -> None:
         """Convert and set sensor value."""
         try:
             if self._sensor_type == SENSOR_TEMPERATURE:
@@ -436,7 +436,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = _get_voc_device_class(voc_unit)
 
     @property
-    def icon(self):
+    def icon(self) -> str | None:
         if self._sensor_type == SENSOR_BATTERY:
             charging = self.coordinator.data.get("battery_charging")
             if charging or self._attr_native_value is None:

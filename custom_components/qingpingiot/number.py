@@ -14,25 +14,20 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
+    Capability,
+    CONF_CO2_OFFSET,
+    CONF_HUMIDITY_OFFSET,
     CONF_REPORT_INTERVAL,
     CONF_TEMPERATURE_OFFSET,
-    CONF_HUMIDITY_OFFSET,
-    CONF_CO2_OFFSET,
-    # CONF_PM25_OFFSET,
-    # CONF_PM10_OFFSET,
-    # CONF_NOISE_OFFSET,
-    # CONF_TVOC_INDEX_OFFSET,
-    DEFAULT_REPORT_INTERVAL,
     DEFAULT_OFFSET,
+    DEFAULT_REPORT_INTERVAL,
+    DEVICE_MODELS,
     DOMAIN,
     MQTT_TOPIC_PREFIX,
     TLV_MODELS,
-    Capability,
-    DEVICE_MODELS,
 )
-from .tlv import int_to_bytes_little_endian, tlv_encode
-
 from .coordinator import QingpingCoordinator
+from .tlv import int_to_bytes_little_endian, tlv_encode
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,22 +45,6 @@ OFFSET_DEFS = {
         CONF_CO2_OFFSET, "co2_offset", "ppm",
         0x45, -500, 500, 1, "co2_offset",
     ),
-    # Capability.PM25: (
-    #     CONF_PM25_OFFSET, "pm25_offset", "µg/m³",
-    #     0x4B, -500, 500, 1, "pm25_offset",
-    # ),
-    # Capability.PM10: (
-    #     CONF_PM10_OFFSET, "pm10_offset", "µg/m³",
-    #     0x4D, -500, 500, 1, "pm10_offset",
-    # ),
-    # Capability.NOISE: (
-    #     CONF_NOISE_OFFSET, "noise_offset", "dB",
-    #     None, -10, 10, 0.1, "noise_offset",
-    # ),
-    # Capability.ETVOC: (
-    #     CONF_TVOC_INDEX_OFFSET, "tvoc_index_offset", "",
-    #     None, -500, 500, 1, "tvoc_index_offset",
-    # ),
 }
 
 

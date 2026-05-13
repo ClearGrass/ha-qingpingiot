@@ -13,11 +13,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
+    Capability,
+    DEVICE_MODELS,
     DOMAIN,
     MQTT_TOPIC_PREFIX,
     TLV_MODELS,
-    Capability,
-    DEVICE_MODELS,
 )
 from .coordinator import QingpingCoordinator
 from .tlv import tlv_encode

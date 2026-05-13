@@ -114,7 +114,7 @@ def decode_realtime_data(byte_array: bytes, product_id: int = 0) -> dict[str, An
     realtime_data = decode_th_data(byte_array[4:], product_id)
     rssi = byte_array[10]
     if rssi >= 128:
-        rssi = rssi - 256
+        rssi -= 256
 
     realtime_data["dataType"] = "event"
     realtime_data["timestamp"] = timestamp

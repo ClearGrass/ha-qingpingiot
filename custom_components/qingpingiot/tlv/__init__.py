@@ -1,4 +1,6 @@
 """TLV protocol implementation for Qingping devices."""
+from __future__ import annotations
+
 from .decoder import (
     bytes_to_int_little_endian,
     fmt_timestamp,

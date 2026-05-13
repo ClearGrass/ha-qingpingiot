@@ -113,11 +113,8 @@ CONF_PRESSURE_OFFSET: Final = "pressure_offset"
 
 DEFAULT_OFFSET: Final = 0
 
-# LED indicator
-
 
 # Device model definitions
-# key 是 HA 插件内部使用的逻辑型号，后续实体根据此 key 决定行为
 class DeviceModelInfo(TypedDict):
     """Device model metadata."""
 
@@ -127,7 +124,7 @@ class DeviceModelInfo(TypedDict):
 
 
 DEVICE_MODELS: dict[str, DeviceModelInfo] = {
-    # -- Robb 室内环境检测仪/Qingping Indoor Environment Monitor --
+    # -- Qingping Indoor Environment Monitor --
     "CGR1W": {
         "name": "Qingping Indoor Environment Monitor",
         "protocols": [Protocol.MQTT],
@@ -146,7 +143,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.TEMPERATURE_UNIT,
         ],
     },
-    # -- Frog S 青萍商用多功能检测仪/Qingping Multi-Role Monitor Pro --
+    # -- Qingping Multi-Role Monitor Pro --
     "CGF2W": {
         "name": "Qingping Multi-Role Monitor Pro",
         "protocols": [Protocol.MQTT],
@@ -156,8 +153,8 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
         ],
     },
     # Qingping Air Monitor
-    "CGS2":{
-        "name":"Qingping Air Monitor",
+    "CGS2": {
+        "name": "Qingping Air Monitor",
         "protocols": [Protocol.MQTT],
         "capabilities": [
             Capability.TEMPERATURE,
@@ -172,14 +169,14 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
     }
 }
 
-# 用于 config_flow 的下拉选项
+# Options for config_flow dropdown
 MODEL_OPTIONS: Final = [
     {"value": model, "label": info["name"]}
     for model, info in DEVICE_MODELS.items()
 ]
 
-# JSON 协议设备
+# JSON protocol devices
 JSON_MODELS: Final = [m for m in ("CGS1", "CGS2", "CGDN1") if m in DEVICE_MODELS]
 
-# TLV 协议设备
+# TLV protocol devices
 TLV_MODELS: Final = [m for m in DEVICE_MODELS if m not in JSON_MODELS]
