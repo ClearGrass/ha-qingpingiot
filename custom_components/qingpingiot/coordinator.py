@@ -188,6 +188,12 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._update_online_status(new_data)
             return
 
+        # type 17 (history): only process for CGDN1, skip for others
+        if message_type in (17, "17") and self.model != "CGDN1":
+            self.async_set_updated_data(new_data)
+            self._update_online_status(new_data)
+            return
+
         new_data["sensor_data_list"] = sensor_data_list
         self.async_set_updated_data(new_data)
         self._update_online_status(new_data)
