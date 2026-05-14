@@ -120,6 +120,7 @@
         "state": {
           "charging": "Charging",
           "discharging": "Discharging",
+          "full": "Full",
           "unknown": "Unknown"
         }
       }

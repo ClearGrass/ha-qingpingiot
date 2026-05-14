@@ -120,6 +120,7 @@
         "state": {
           "charging": "[%key:common::state::charging%]",
           "discharging": "[%key:common::state::discharging%]",
+          "full": "Full",
           "unknown": "Unknown"
         }
       }

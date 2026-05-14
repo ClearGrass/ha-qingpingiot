@@ -119,7 +119,7 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             cmd = payload[2] if len(payload) > 2 else 0
             decoded = tlv_decode(payload)
-            _LOGGER.debug("[%s] TLV payload: %s, decoded: %s", self.mac, payload.hex(), decoded)
+            _LOGGER.debug("[%s] TLV payload, decoded: %s", self.mac,decoded)
             if not decoded:
                 return
 
@@ -159,7 +159,6 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def _handle_json_message(self, payload: bytes) -> None:
         """Process JSON payload (legacy devices)."""
         payload_dict = json.loads(payload)
-        _LOGGER.debug("[%s] JSON payload: %s", self.mac, payload_dict)
         if not isinstance(payload_dict, dict):
             return
 
@@ -177,10 +176,17 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if mac_addr is not None:
             new_data["mac"] = mac_addr
 
-        if message_type in (28, "28"):
+        # Only process type 17 (history sensor data), skip all others
+        if message_type not in (17, "17"):
             self.async_set_updated_data(new_data)
             self._update_online_status(new_data)
             return
+
+        # ACK for type 17 messages that require it
+        if payload_dict.get("need_ack") in (1, "1"):
+            msg_id = payload_dict.get("id")
+            if msg_id is not None:
+                self._send_json_ack(msg_id, current_timestamp)
 
         sensor_data_list = payload_dict.get("sensorData")
         if not isinstance(sensor_data_list, list) or not sensor_data_list:
@@ -188,15 +194,35 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._update_online_status(new_data)
             return
 
-        # type 17 (history): only process for CGDN1, skip for others
-        if message_type in (17, "17") and self.model != "CGDN1":
-            self.async_set_updated_data(new_data)
-            self._update_online_status(new_data)
-            return
+        # Extract battery charging state from sensorData
+        first_entry = sensor_data_list[0]
+        battery_data = first_entry.get("battery")
+        if isinstance(battery_data, dict):
+            battery_status = battery_data.get("status", 0)
+            if battery_status == 2:
+                new_data["battery_charging"] = "full"
+            else:
+                new_data["battery_charging"] = battery_status == 1
 
         new_data["sensor_data_list"] = sensor_data_list
         self.async_set_updated_data(new_data)
         self._update_online_status(new_data)
+
+    @callback
+    def _send_json_ack(self, msg_id: int | str, timestamp: int) -> None:
+        """Send ACK (type 18) for received sensor data."""
+        ack = json.dumps({
+            "type": "18",
+            "timestamp": timestamp,
+            "ack_id": msg_id,
+            "code": 0,
+        })
+        topic = f"{MQTT_TOPIC_PREFIX}/{self.mac}/down"
+        self.hass.async_create_task(
+            mqtt.async_publish(self.hass, topic, ack),
+            f"qingping_ack_{self.mac}_{msg_id}",
+        )
+        _LOGGER.debug("[%s] Sent ACK for id=%s", self.mac, msg_id)
 
     # -- Online status --
 

@@ -120,6 +120,7 @@
         "state": {
           "charging": "充电中",
           "discharging": "放电中",
+          "full": "已充满",
           "unknown": "未知"
         }
       }
