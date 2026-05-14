@@ -96,7 +96,8 @@ CONF_REPORT_INTERVAL: Final = "report_interval"  # Minutes (KEY 0x04)
 CONF_SAMPLE_INTERVAL: Final = "sample_interval"  # Seconds (KEY 0x05)
 CONF_UPDATE_INTERVAL: Final = "update_interval"  # Seconds (JSON devices)
 
-DEFAULT_REPORT_INTERVAL: Final = 10  # minutes
+DEFAULT_REPORT_INTERVAL_TLV: Final = 15  # minutes
+DEFAULT_REPORT_INTERVAL_JSON: Final = 900  # seconds
 DEFAULT_SAMPLE_INTERVAL: Final = 60  # seconds
 DEFAULT_UPDATE_INTERVAL: Final = 60  # seconds
 

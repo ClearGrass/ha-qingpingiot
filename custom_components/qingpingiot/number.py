@@ -20,7 +20,8 @@ from .const import (
     CONF_REPORT_INTERVAL,
     CONF_TEMPERATURE_OFFSET,
     DEFAULT_OFFSET,
-    DEFAULT_REPORT_INTERVAL,
+    DEFAULT_REPORT_INTERVAL_JSON,
+    DEFAULT_REPORT_INTERVAL_TLV,
     DEVICE_MODELS,
     DOMAIN,
     MQTT_TOPIC_PREFIX,
@@ -125,7 +126,10 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
     def native_value(self) -> int:
         return self.coordinator.data.get(
             CONF_REPORT_INTERVAL,
-            self._config_entry.data.get(CONF_REPORT_INTERVAL, DEFAULT_REPORT_INTERVAL),
+            self._config_entry.data.get(
+                CONF_REPORT_INTERVAL,
+                DEFAULT_REPORT_INTERVAL_TLV if self._is_tlv else DEFAULT_REPORT_INTERVAL_JSON,
+            ),
         )
 
     async def async_set_native_value(self, value: float) -> None:
@@ -160,7 +164,8 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
     def _handle_coordinator_update(self) -> None:
         if CONF_REPORT_INTERVAL not in self.coordinator.data:
             self.coordinator.data[CONF_REPORT_INTERVAL] = self._config_entry.data.get(
-                CONF_REPORT_INTERVAL, DEFAULT_REPORT_INTERVAL
+                CONF_REPORT_INTERVAL,
+                DEFAULT_REPORT_INTERVAL_TLV if self._is_tlv else DEFAULT_REPORT_INTERVAL_JSON,
             )
         self.async_write_ha_state()
 
