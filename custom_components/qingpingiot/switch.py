@@ -1,6 +1,7 @@
 """Support for Qingping IoT switch entities."""
 from __future__ import annotations
 
+import json
 import logging
 
 from homeassistant.components import mqtt
@@ -49,7 +50,7 @@ async def async_setup_entry(
     }
 
     model_info = DEVICE_MODELS.get(model)
-    if not model_info or model not in TLV_MODELS:
+    if not model_info:
         async_add_entities([])
         return
 
@@ -60,8 +61,8 @@ async def async_setup_entry(
             continue
         translation_key, tlv_key = CAPABILITY_SWITCH_MAP[cap]
         entities.append(
-            QingpingTLVSwitch(
-                coordinator, config_entry, mac, device_info,
+            QingpingSwitch(
+                coordinator, config_entry, mac, model, device_info,
                 translation_key, tlv_key,
             )
         )
@@ -69,8 +70,8 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class QingpingTLVSwitch(CoordinatorEntity, SwitchEntity):
-    """Switch entity for TLV devices, sends command via TLV protocol."""
+class QingpingSwitch(CoordinatorEntity, SwitchEntity):
+    """Switch entity, sends command via TLV or JSON protocol."""
 
     _attr_has_entity_name = True
 
@@ -79,6 +80,7 @@ class QingpingTLVSwitch(CoordinatorEntity, SwitchEntity):
         coordinator: QingpingCoordinator,
         config_entry: ConfigEntry,
         mac: str,
+        model: str,
         device_info: dict,
         translation_key: str,
         tlv_key: int,
@@ -86,6 +88,8 @@ class QingpingTLVSwitch(CoordinatorEntity, SwitchEntity):
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
+        self._model = model
+        self._is_tlv = model in TLV_MODELS
         self._conf_key = translation_key
         self._tlv_key = tlv_key
         self._attr_translation_key = translation_key
@@ -100,19 +104,24 @@ class QingpingTLVSwitch(CoordinatorEntity, SwitchEntity):
     async def async_turn_on(self) -> None:
         self.coordinator.data[self._conf_key] = True
         self.async_write_ha_state()
-        await self._send_tlv(1)
+        await self._send(1)
 
     async def async_turn_off(self) -> None:
         self.coordinator.data[self._conf_key] = False
         self.async_write_ha_state()
-        await self._send_tlv(0)
+        await self._send(0)
 
-    async def _send_tlv(self, value: int) -> None:
-        packets = {self._tlv_key: bytes([value])}
-        payload = tlv_encode(0x32, packets)
+    async def _send(self, value: int) -> None:
         topic = f"{MQTT_TOPIC_PREFIX}/{self._mac}/down"
-        await mqtt.async_publish(self.hass, topic, payload)
-        _LOGGER.debug("[%s] Sent TLV %s=%d (key=0x%02X)", self._mac, self._conf_key, value, self._tlv_key)
+        if self._is_tlv:
+            packets = {self._tlv_key: bytes([value])}
+            payload = tlv_encode(0x32, packets)
+            await mqtt.async_publish(self.hass, topic, payload)
+            _LOGGER.debug("[%s] Sent TLV %s=%d (key=0x%02X)", self._mac, self._conf_key, value, self._tlv_key)
+        else:
+            payload = json.dumps({"type": "17", "setting": {self._conf_key: value}})
+            await mqtt.async_publish(self.hass, topic, payload)
+            _LOGGER.debug("[%s] Sent JSON %s=%d", self._mac, self._conf_key, value)
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()

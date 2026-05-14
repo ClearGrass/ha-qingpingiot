@@ -188,11 +188,6 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._update_online_status(new_data)
             return
 
-        if message_type in (17, 13, "17", "13"):
-            self.async_set_updated_data(new_data)
-            self._update_online_status(new_data)
-            return
-
         new_data["sensor_data_list"] = sensor_data_list
         self.async_set_updated_data(new_data)
         self._update_online_status(new_data)

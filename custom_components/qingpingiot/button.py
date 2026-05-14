@@ -1,6 +1,7 @@
 """Support for Qingping IoT button entities."""
 from __future__ import annotations
 
+import json
 import logging
 
 from homeassistant.components import mqtt
@@ -48,7 +49,7 @@ async def async_setup_entry(
     }
 
     model_info = DEVICE_MODELS.get(model)
-    if not model_info or model not in TLV_MODELS:
+    if not model_info:
         async_add_entities([])
         return
 
@@ -59,8 +60,8 @@ async def async_setup_entry(
             continue
         translation_key, tlv_key, tlv_value = CAPABILITY_BUTTON_MAP[cap]
         entities.append(
-            QingpingTLVButton(
-                coordinator, config_entry, mac, device_info,
+            QingpingButton(
+                coordinator, config_entry, mac, model, device_info,
                 translation_key, tlv_key, tlv_value,
             )
         )
@@ -68,8 +69,8 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class QingpingTLVButton(CoordinatorEntity, ButtonEntity):
-    """Button entity for TLV devices, sends one-shot command via TLV protocol."""
+class QingpingButton(CoordinatorEntity, ButtonEntity):
+    """Button entity, sends one-shot command via TLV or JSON protocol."""
 
     _attr_has_entity_name = True
 
@@ -78,6 +79,7 @@ class QingpingTLVButton(CoordinatorEntity, ButtonEntity):
         coordinator: QingpingCoordinator,
         config_entry: ConfigEntry,
         mac: str,
+        model: str,
         device_info: dict,
         translation_key: str,
         tlv_key: int,
@@ -86,6 +88,8 @@ class QingpingTLVButton(CoordinatorEntity, ButtonEntity):
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
+        self._model = model
+        self._is_tlv = model in TLV_MODELS
         self._tlv_key = tlv_key
         self._tlv_value = tlv_value
         self._attr_translation_key = translation_key
@@ -94,8 +98,14 @@ class QingpingTLVButton(CoordinatorEntity, ButtonEntity):
         self._attr_entity_category = EntityCategory.CONFIG
 
     async def async_press(self) -> None:
-        packets = {self._tlv_key: bytes([self._tlv_value])}
-        payload = tlv_encode(0x32, packets)
         topic = f"{MQTT_TOPIC_PREFIX}/{self._mac}/down"
-        await mqtt.async_publish(self.hass, topic, payload)
-        _LOGGER.debug("[%s] Sent TLV button %s (key=0x%02X, val=%d)", self._mac, self._attr_translation_key, self._tlv_key, self._tlv_value)
+        if self._is_tlv:
+            packets = {self._tlv_key: bytes([self._tlv_value])}
+            payload = tlv_encode(0x32, packets)
+            await mqtt.async_publish(self.hass, topic, payload)
+            _LOGGER.debug("[%s] Sent TLV button %s (key=0x%02X, val=%d)", self._mac, self._attr_translation_key, self._tlv_key, self._tlv_value)
+        else:
+            # JSON devices use type 29 for CO2 calibration
+            payload = json.dumps({"type": "29"})
+            await mqtt.async_publish(self.hass, topic, payload)
+            _LOGGER.debug("[%s] Sent JSON button %s (type=29)", self._mac, self._attr_translation_key)

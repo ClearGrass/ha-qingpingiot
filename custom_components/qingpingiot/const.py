@@ -166,7 +166,22 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.BATTERY,
             Capability.ETVOC,
         ],
-    }
+    },
+    # Qingping Air Monitor Lite
+    "CGDN1": {
+        "name": "Qingping Air Monitor Lite",
+        "protocols": [Protocol.MQTT],
+        "capabilities": [
+            Capability.TEMPERATURE,
+            Capability.HUMIDITY,
+            Capability.CO2,
+            Capability.PM25,
+            Capability.PM10,
+            Capability.BATTERY,
+            Capability.CO2_ASC,
+            Capability.CO2_CALIBRATION,
+        ],
+    },
 }
 
 # Options for config_flow dropdown
