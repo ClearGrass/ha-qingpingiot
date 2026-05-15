@@ -160,6 +160,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
         "capabilities": [
             Capability.TEMPERATURE,
             Capability.HUMIDITY,
+            Capability.TEMPERATURE_UNIT,
         ],
         "report_interval": {"default": 60, "min": 10, "unit": "min"},
     },
@@ -192,6 +193,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.BATTERY,
             Capability.CO2_ASC,
             Capability.CO2_CALIBRATION,
+            Capability.TEMPERATURE_UNIT,
         ],
         "report_interval": {"default": 900, "min": 60, "unit": "s"},
     },

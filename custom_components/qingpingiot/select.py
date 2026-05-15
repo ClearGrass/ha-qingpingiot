@@ -1,6 +1,7 @@
 """Support for Qingping IoT select entities."""
 from __future__ import annotations
 
+import json
 import logging
 
 from homeassistant.components import mqtt
@@ -55,7 +56,7 @@ async def async_setup_entry(
     }
 
     model_info = DEVICE_MODELS.get(model)
-    if not model_info or model not in TLV_MODELS:
+    if not model_info:
         async_add_entities([])
         return
 
@@ -75,7 +76,7 @@ async def async_setup_entry(
         elif entity_type == "temperature":
             entities.append(
                 QingpingTLVTemperatureUnitSelect(
-                    coordinator, config_entry, mac, device_info,
+                    coordinator, config_entry, mac, model, device_info,
                     conf_key, translation_key, options,
                 )
             )
@@ -147,18 +148,21 @@ class QingpingTLVeTVOCUnitSelect(CoordinatorEntity, SelectEntity):
 
 
 class QingpingTLVTemperatureUnitSelect(CoordinatorEntity, SelectEntity):
-    """Select entity for temperature unit on TLV devices."""
+    """Select entity for temperature unit, supports both TLV and JSON devices."""
 
     _attr_has_entity_name = True
 
     # TLV KEY 0x19: 0x00=Celsius, 0x01=Fahrenheit
     _TLV_UNIT_MAP = {"°C": 0x00, "°F": 0x01}
+    # JSON: "C" or "F"
+    _JSON_UNIT_MAP = {"°C": "C", "°F": "F"}
 
     def __init__(
         self,
         coordinator: QingpingCoordinator,
         config_entry: ConfigEntry,
         mac: str,
+        model: str,
         device_info: dict,
         conf_key: str,
         translation_key: str,
@@ -167,6 +171,8 @@ class QingpingTLVTemperatureUnitSelect(CoordinatorEntity, SelectEntity):
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
+        self._model = model
+        self._is_tlv = model in TLV_MODELS
         self._conf_key = conf_key
         self._attr_translation_key = translation_key
         self._attr_unique_id = f"{mac}_{conf_key}"
@@ -189,12 +195,19 @@ class QingpingTLVTemperatureUnitSelect(CoordinatorEntity, SelectEntity):
 
         await self.coordinator.async_request_refresh()
 
-        tlv_value = self._TLV_UNIT_MAP.get(option, 0x00)
-        packets = {0x19: bytes([tlv_value])}
-        payload = tlv_encode(0x32, packets)
         topic = f"{MQTT_TOPIC_PREFIX}/{self._mac}/down"
+
+        if self._is_tlv:
+            tlv_value = self._TLV_UNIT_MAP.get(option, 0x00)
+            packets = {0x19: bytes([tlv_value])}
+            payload = tlv_encode(0x32, packets)
+            _LOGGER.debug("[%s] Sent TLV %s=%s (key=0x19, val=%d)", self._mac, self._conf_key, option, tlv_value)
+        else:
+            json_value = self._JSON_UNIT_MAP.get(option, "C")
+            payload = json.dumps({"type": "17", "setting": {"temperature_unit": json_value}})
+            _LOGGER.debug("[%s] Sent JSON %s=%s", self._mac, self._conf_key, json_value)
+
         await mqtt.async_publish(self.hass, topic, payload)
-        _LOGGER.debug("[%s] Sent TLV %s=%s (key=0x19, val=%d)", self._mac, self._conf_key, option, tlv_value)
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
