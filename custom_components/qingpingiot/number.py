@@ -141,16 +141,20 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
         topic = f"{MQTT_TOPIC_PREFIX}/{self._mac}/down"
 
         if self._is_tlv:
-            packets = {0x04: int_to_bytes_little_endian(int_value, 2)}
+            sample_interval = int_value * 60
+            packets = {
+                0x04: int_to_bytes_little_endian(int_value, 2),
+                0x05: int_to_bytes_little_endian(sample_interval, 2),
+            }
             payload = tlv_encode(0x32, packets)
-            _LOGGER.debug("[%s] Sending TLV report_interval=%d min", self._mac, int_value)
+            _LOGGER.debug("[%s] Sending TLV report_interval=%d min, sample_interval=%d s", self._mac, int_value, sample_interval)
             await mqtt.async_publish(self.hass, topic, payload)
         else:
             payload = json.dumps({
                 "type": "17",
-                "setting": {"report_interval": int_value},
+                "setting": {"report_interval": int_value, "collect_interval": int_value},
             })
-            _LOGGER.debug("[%s] Sending JSON report_interval=%d s", self._mac, int_value)
+            _LOGGER.debug("[%s] Sending JSON report_interval=%d s, collect_interval=%d s", self._mac, int_value, int_value)
             await mqtt.async_publish(self.hass, topic, payload)
 
     async def async_added_to_hass(self) -> None:

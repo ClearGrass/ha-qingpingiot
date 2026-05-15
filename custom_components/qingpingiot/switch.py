@@ -25,10 +25,10 @@ from .tlv import tlv_encode
 
 _LOGGER = logging.getLogger(__name__)
 
-# Capability -> switch config: (translation_key, tlv_key)
-CAPABILITY_SWITCH_MAP: dict[Capability, tuple[str, int]] = {
-    Capability.CO2_ASC: ("co2_asc", 0x40),
-    Capability.LED_INDICATOR: ("led_indicator", 0x63),
+# Capability -> switch config: (translation_key, tlv_key, default)
+CAPABILITY_SWITCH_MAP: dict[Capability, tuple[str, int, bool]] = {
+    Capability.CO2_ASC: ("co2_asc", 0x40, True),
+    Capability.LED_INDICATOR: ("led_indicator", 0x63, True),
 }
 
 
@@ -59,11 +59,11 @@ async def async_setup_entry(
     for cap in model_info["capabilities"]:
         if cap not in CAPABILITY_SWITCH_MAP:
             continue
-        translation_key, tlv_key = CAPABILITY_SWITCH_MAP[cap]
+        translation_key, tlv_key, default = CAPABILITY_SWITCH_MAP[cap]
         entities.append(
             QingpingSwitch(
                 coordinator, config_entry, mac, model, device_info,
-                translation_key, tlv_key,
+                translation_key, tlv_key, default,
             )
         )
 
@@ -84,6 +84,7 @@ class QingpingSwitch(CoordinatorEntity, SwitchEntity):
         device_info: dict,
         translation_key: str,
         tlv_key: int,
+        default: bool = False,
     ) -> None:
         super().__init__(coordinator)
         self._config_entry = config_entry
@@ -92,6 +93,7 @@ class QingpingSwitch(CoordinatorEntity, SwitchEntity):
         self._is_tlv = model in TLV_MODELS
         self._conf_key = translation_key
         self._tlv_key = tlv_key
+        self._default = default
         self._attr_translation_key = translation_key
         self._attr_unique_id = f"{mac}_{translation_key}"
         self._attr_device_info = device_info
@@ -99,7 +101,7 @@ class QingpingSwitch(CoordinatorEntity, SwitchEntity):
 
     @property
     def is_on(self) -> bool:
-        return self.coordinator.data.get(self._conf_key, False)
+        return self.coordinator.data.get(self._conf_key, self._default)
 
     async def async_turn_on(self) -> None:
         self.coordinator.data[self._conf_key] = True
@@ -130,5 +132,5 @@ class QingpingSwitch(CoordinatorEntity, SwitchEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         if self._conf_key not in self.coordinator.data:
-            self.coordinator.data[self._conf_key] = False
+            self.coordinator.data[self._conf_key] = self._default
         self.async_write_ha_state()
