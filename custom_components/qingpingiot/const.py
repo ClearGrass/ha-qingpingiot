@@ -96,8 +96,6 @@ CONF_REPORT_INTERVAL: Final = "report_interval"  # Minutes (KEY 0x04)
 CONF_SAMPLE_INTERVAL: Final = "sample_interval"  # Seconds (KEY 0x05)
 CONF_UPDATE_INTERVAL: Final = "update_interval"  # Seconds (JSON devices)
 
-DEFAULT_REPORT_INTERVAL_TLV: Final = 15  # minutes
-DEFAULT_REPORT_INTERVAL_JSON: Final = 900  # seconds
 DEFAULT_SAMPLE_INTERVAL: Final = 60  # seconds
 DEFAULT_UPDATE_INTERVAL: Final = 60  # seconds
 
@@ -115,6 +113,15 @@ CONF_PRESSURE_OFFSET: Final = "pressure_offset"
 DEFAULT_OFFSET: Final = 0
 
 
+# Report interval config per model
+class ReportIntervalConfig(TypedDict):
+    """Report interval configuration for a device model."""
+
+    default: int
+    min: int
+    unit: str  # "min" or "s"
+
+
 # Device model definitions
 class DeviceModelInfo(TypedDict):
     """Device model metadata."""
@@ -122,6 +129,7 @@ class DeviceModelInfo(TypedDict):
     name: str
     protocols: list[str]
     capabilities: list[Capability]
+    report_interval: ReportIntervalConfig
 
 
 DEVICE_MODELS: dict[str, DeviceModelInfo] = {
@@ -143,6 +151,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.LED_INDICATOR,
             Capability.TEMPERATURE_UNIT,
         ],
+        "report_interval": {"default": 60, "min": 1, "unit": "min"},
     },
     # -- Qingping Multi-Role Monitor Pro --
     "CGF2W": {
@@ -152,6 +161,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.TEMPERATURE,
             Capability.HUMIDITY,
         ],
+        "report_interval": {"default": 60, "min": 10, "unit": "min"},
     },
     # Qingping Air Monitor
     "CGS2": {
@@ -167,6 +177,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.BATTERY,
             Capability.ETVOC,
         ],
+        "report_interval": {"default": 900, "min": 10, "unit": "s"},
     },
     # Qingping Air Monitor Lite
     "CGDN1": {
@@ -182,6 +193,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.CO2_ASC,
             Capability.CO2_CALIBRATION,
         ],
+        "report_interval": {"default": 900, "min": 60, "unit": "s"},
     },
 }
 

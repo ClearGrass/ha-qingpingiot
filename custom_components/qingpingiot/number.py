@@ -20,8 +20,6 @@ from .const import (
     CONF_REPORT_INTERVAL,
     CONF_TEMPERATURE_OFFSET,
     DEFAULT_OFFSET,
-    DEFAULT_REPORT_INTERVAL_JSON,
-    DEFAULT_REPORT_INTERVAL_TLV,
     DEVICE_MODELS,
     DOMAIN,
     MQTT_TOPIC_PREFIX,
@@ -105,22 +103,21 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
         self._mac = mac
         self._model = model
         self._is_tlv = model in TLV_MODELS
+
+        ri_config = DEVICE_MODELS.get(model, {}).get("report_interval", {})
+        self._ri_default = ri_config.get("default", 15)
+        ri_unit = ri_config.get("unit", "min")
+
         self._attr_unique_id = f"{mac}_report_interval"
         self._attr_device_info = device_info
         self._attr_mode = NumberMode.BOX
         self._attr_entity_category = EntityCategory.CONFIG
         self._attr_icon = "mdi:clock-outline"
 
-        if self._is_tlv:
-            self._attr_native_min_value = 1
-            self._attr_native_max_value = 1440
-            self._attr_native_step = 1
-            self._attr_native_unit_of_measurement = "min"
-        else:
-            self._attr_native_min_value = 1
-            self._attr_native_max_value = 86400
-            self._attr_native_step = 1
-            self._attr_native_unit_of_measurement = "s"
+        self._attr_native_min_value = ri_config.get("min", 1)
+        self._attr_native_max_value = 1440 if ri_unit == "min" else 86400
+        self._attr_native_step = 1
+        self._attr_native_unit_of_measurement = ri_unit
 
     @property
     def native_value(self) -> int:
@@ -128,7 +125,7 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
             CONF_REPORT_INTERVAL,
             self._config_entry.data.get(
                 CONF_REPORT_INTERVAL,
-                DEFAULT_REPORT_INTERVAL_TLV if self._is_tlv else DEFAULT_REPORT_INTERVAL_JSON,
+                self._ri_default,
             ),
         )
 
@@ -165,7 +162,7 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
         if CONF_REPORT_INTERVAL not in self.coordinator.data:
             self.coordinator.data[CONF_REPORT_INTERVAL] = self._config_entry.data.get(
                 CONF_REPORT_INTERVAL,
-                DEFAULT_REPORT_INTERVAL_TLV if self._is_tlv else DEFAULT_REPORT_INTERVAL_JSON,
+                self._ri_default,
             )
         self.async_write_ha_state()
 

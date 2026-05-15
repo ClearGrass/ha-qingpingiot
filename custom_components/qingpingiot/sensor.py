@@ -40,7 +40,6 @@ from .const import (
     SENSOR_PRESSURE,
     SENSOR_SIGNAL_STRENGTH,
     SENSOR_TEMPERATURE,
-    SENSOR_TVOC,
     TLV_MODELS,
 )
 from .coordinator import QingpingCoordinator
@@ -85,18 +84,11 @@ CAPABILITY_SENSOR_MAP: dict[Capability, dict] = {
         "device_class": SensorDeviceClass.PM10,
         "state_class": SensorStateClass.MEASUREMENT,
     },
-    Capability.TVOC: {
-        "sensor_type": SENSOR_TVOC,
-        "translation_key": "tvoc",
-        "unit": PPB,
-        "device_class": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
-        "state_class": SensorStateClass.MEASUREMENT,
-    },
     Capability.ETVOC: {
         "sensor_type": SENSOR_ETVOC,
         "translation_key": "etvoc",
         "unit": INDEX,
-        "device_class": SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
+        "device_class": None,
         "state_class": SensorStateClass.MEASUREMENT,
     },
     Capability.NOISE: {
@@ -295,10 +287,10 @@ class QingpingBatteryStateSensor(CoordinatorEntity, SensorEntity):
 # -- Main Sensor Entity --
 
 
-def _get_voc_device_class(unit: str | None) -> SensorDeviceClass:
+def _get_eTvoc_device_class(unit: str | None) -> SensorDeviceClass:
     """Get appropriate device class for VOC sensor based on unit."""
     if unit == "index":
-        return SensorDeviceClass.AQI
+        return None
     if unit in ("ppb", "ppm"):
         return SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS
     if unit == "mg/m³":
@@ -409,8 +401,8 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
                 self._attr_native_value = round(float(value), 1)
             elif self._sensor_type == SENSOR_PRESSURE:
                 self._attr_native_value = round(float(value), 2)
-            elif self._sensor_type in (SENSOR_TVOC, SENSOR_ETVOC):
-                self._update_voc_value(int(value))
+            elif self._sensor_type in (SENSOR_ETVOC):
+                self._update_eTVOC_value(int(value))
             else:
                 self._attr_native_value = int(value)
 
@@ -419,7 +411,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         except ValueError:
             _LOGGER.error("Invalid value for %s: %s", self._sensor_type, value)
 
-    def _update_voc_value(self, raw_value: int) -> None:
+    def _update_eTVOC_value(self, raw_value: int) -> None:
         """Update eTVOC with unit conversion."""
         voc_unit = self.coordinator.data.get(CONF_ETVOC_UNIT, "index")
 
@@ -434,8 +426,8 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
             voc_value = raw_value
 
         self._attr_native_value = voc_value
-        self._attr_native_unit_of_measurement = None if voc_unit == "index" else voc_unit
-        self._attr_device_class = _get_voc_device_class(voc_unit)
+        self._attr_native_unit_of_measurement = INDEX if voc_unit == "index" else voc_unit
+        self._attr_device_class = _get_eTvoc_device_class(voc_unit)
 
     @property
     def icon(self) -> str | None:
