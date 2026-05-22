@@ -2,19 +2,26 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_MAC, CONF_MODEL, CONF_NAME
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, PLATFORMS
+from .const import PLATFORMS
 from .coordinator import QingpingCoordinator
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Qingping IoT from a config entry."""
-    hass.data.setdefault(DOMAIN, {})
+@dataclass
+class QingpingData:
+    coordinator: QingpingCoordinator
 
+
+type QingpingConfigEntry = ConfigEntry[QingpingData]
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: QingpingConfigEntry) -> bool:
+    """Set up Qingping IoT from a config entry."""
     mac = entry.data[CONF_MAC]
     model = entry.data[CONF_MODEL]
     name = entry.data[CONF_NAME]
@@ -22,7 +29,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = QingpingCoordinator(hass, entry, mac, model, name)
     await coordinator.async_config_entry_first_refresh()
 
-    hass.data[DOMAIN][entry.entry_id] = {"coordinator": coordinator}
+    entry.runtime_data = QingpingData(coordinator)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -32,9 +39,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: QingpingConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unload_ok:
-        hass.data[DOMAIN].pop(entry.entry_id)
-    return unload_ok
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

@@ -28,8 +28,8 @@ from .tlv import tlv_encode
 
 _LOGGER = logging.getLogger(__name__)
 
-ETVOC_UNIT_OPTIONS = ["index", "ppb", "mg/m³"]
-TEMPERATURE_UNIT_OPTIONS = ["°C", "°F"]
+ETVOC_UNIT_OPTIONS = ["index", "ppb", "mg_m3"]
+TEMPERATURE_UNIT_OPTIONS = ["celsius", "fahrenheit"]
 
 
 # Capability -> (conf_key, translation_key, options, entity_class)
@@ -52,9 +52,7 @@ async def async_setup_entry(
     """Set up Qingping select entities from a config entry."""
     mac = config_entry.data[CONF_MAC]
     model = config_entry.data[CONF_MODEL]
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
-        "coordinator"
-    ]
+    coordinator: QingpingCoordinator = config_entry.runtime_data.coordinator
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},
@@ -109,7 +107,7 @@ class QingpingTLVeTVOCUnitSelect(CoordinatorEntity, SelectEntity):
     _attr_has_entity_name = True
 
     # TLV KEY 0x62: 1=index, 3=mg/m³, 4=ppb
-    _TLV_UNIT_MAP = {"index": 1, "mg/m³": 3, "ppb": 4}
+    _TLV_UNIT_MAP = {"index": 1, "mg_m3": 3, "ppb": 4}
 
     def __init__(
         self,
@@ -178,9 +176,9 @@ class QingpingTLVTemperatureUnitSelect(CoordinatorEntity, SelectEntity):
     _attr_has_entity_name = True
 
     # TLV KEY 0x19: 0x00=Celsius, 0x01=Fahrenheit
-    _TLV_UNIT_MAP = {"°C": 0x00, "°F": 0x01}
+    _TLV_UNIT_MAP = {"celsius": 0x00, "fahrenheit": 0x01}
     # JSON: "C" or "F"
-    _JSON_UNIT_MAP = {"°C": "C", "°F": "F"}
+    _JSON_UNIT_MAP = {"celsius": "C", "fahrenheit": "F"}
 
     def __init__(
         self,

@@ -75,9 +75,7 @@ async def async_setup_entry(
     mac = config_entry.data[CONF_MAC]
     name = config_entry.data[CONF_NAME]
     model = config_entry.data[CONF_MODEL]
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
-        "coordinator"
-    ]
+    coordinator: QingpingCoordinator = config_entry.runtime_data.coordinator
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},

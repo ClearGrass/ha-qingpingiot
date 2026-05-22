@@ -40,9 +40,7 @@ async def async_setup_entry(
     """Set up Qingping button entities from a config entry."""
     mac = config_entry.data[CONF_MAC]
     model = config_entry.data[CONF_MODEL]
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
-        "coordinator"
-    ]
+    coordinator: QingpingCoordinator = config_entry.runtime_data.coordinator
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},

@@ -26,6 +26,7 @@ from .const import (
     DB,
     DEVICE_MODELS,
     DOMAIN,
+    ETVOC_UNIT_DISPLAY_MAP,
     INDEX,
     PERCENTAGE,
     PPM,
@@ -139,9 +140,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Qingping sensors from a config entry."""
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
-        "coordinator"
-    ]
+    coordinator: QingpingCoordinator = config_entry.runtime_data.coordinator
 
     mac = coordinator.mac
     name = coordinator.name
@@ -295,7 +294,7 @@ def _get_eTvoc_device_class(unit: str | None) -> SensorDeviceClass:
         return None
     if unit in ("ppb", "ppm"):
         return SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS
-    if unit == "mg/m³":
+    if unit == "mg_m3":
         return SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
     return SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS
 
@@ -424,7 +423,7 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         if voc_unit == "ppb":
             voc_value = (math.log(501 - raw_value) - 6.24) * -2215.4
             voc_value = int(round(float(voc_value), 0))
-        elif voc_unit == "mg/m³":
+        elif voc_unit == "mg_m3":
             voc_value = (math.log(501 - raw_value) - 6.24) * -2215.4
             voc_value = (voc_value * 4.5 * 10 + 5) / 10 / 1000
             voc_value = round(voc_value, 3)
@@ -432,8 +431,8 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
             voc_value = raw_value
 
         self._attr_native_value = voc_value
-        self._attr_native_unit_of_measurement = (
-            INDEX if voc_unit == "index" else voc_unit
+        self._attr_native_unit_of_measurement = ETVOC_UNIT_DISPLAY_MAP.get(
+            voc_unit, voc_unit
         )
         self._attr_device_class = _get_eTvoc_device_class(voc_unit)
 

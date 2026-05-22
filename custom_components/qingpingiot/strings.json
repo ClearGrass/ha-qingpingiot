@@ -58,9 +58,9 @@
     },
     "model": {
       "options": {
-        "CGR1W": "Qingping Indoor Environment Monitor",
-        "CGF2W": "Qingping Multi-Role Monitor Pro",
-        "CGS2": "Qingping Air Monitor"
+        "cgr1w": "Qingping Indoor Environment Monitor",
+        "cgf2w": "Qingping Multi-Role Monitor Pro",
+        "cgs2": "Qingping Air Monitor"
       }
     }
   },
@@ -157,14 +157,14 @@
         "state": {
           "index": "VOC Index",
           "ppb": "ppb",
-          "mg/m³": "mg/m³"
+          "mg_m3": "mg/m³"
         }
       },
       "temperature_unit": {
         "name": "Temperature Unit",
         "state": {
-          "°C": "°C",
-          "°F": "°F"
+          "celsius": "°C",
+          "fahrenheit": "°F"
         }
       }
     },

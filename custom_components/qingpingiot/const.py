@@ -77,6 +77,10 @@ PPB: Final = "ppb"
 INDEX: Final = "VOC index"
 CONCENTRATION: Final = "µg/m³"
 DB: Final = "dB"
+MG_PER_M3: Final = "mg/m³"
+
+# eTVOC unit: internal key → display unit
+ETVOC_UNIT_DISPLAY_MAP: Final = {"index": INDEX, "ppb": PPB, "mg_m3": MG_PER_M3}
 
 # Report modes (TLV devices)
 CONF_REPORT_MODE: Final = "report_mode"
@@ -134,7 +138,7 @@ class DeviceModelInfo(TypedDict):
 
 DEVICE_MODELS: dict[str, DeviceModelInfo] = {
     # -- Qingping Indoor Environment Monitor --
-    "CGR1W": {
+    "cgr1w": {
         "name": "Qingping Indoor Environment Monitor",
         "protocols": [Protocol.MQTT],
         "capabilities": [
@@ -154,7 +158,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
         "report_interval": {"default": 60, "min": 1, "unit": "min"},
     },
     # -- Qingping Multi-Role Monitor Pro --
-    "CGF2W": {
+    "cgf2w": {
         "name": "Qingping Multi-Role Monitor Pro",
         "protocols": [Protocol.MQTT],
         "capabilities": [
@@ -165,7 +169,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
         "report_interval": {"default": 60, "min": 10, "unit": "min"},
     },
     # Qingping Air Monitor
-    "CGS2": {
+    "cgs2": {
         "name": "Qingping Air Monitor",
         "protocols": [Protocol.MQTT],
         "capabilities": [
@@ -181,7 +185,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
         "report_interval": {"default": 900, "min": 10, "unit": "s"},
     },
     # Qingping Air Monitor Lite
-    "CGDN1": {
+    "cgdn1": {
         "name": "Qingping Air Monitor Lite",
         "protocols": [Protocol.MQTT],
         "capabilities": [
@@ -205,7 +209,7 @@ MODEL_OPTIONS: Final = [
 ]
 
 # JSON protocol devices
-JSON_MODELS: Final = [m for m in ("CGS1", "CGS2", "CGDN1") if m in DEVICE_MODELS]
+JSON_MODELS: Final = [m for m in ("cgs1", "cgs2", "cgdn1") if m in DEVICE_MODELS]
 
 # TLV protocol devices
 TLV_MODELS: Final = [m for m in DEVICE_MODELS if m not in JSON_MODELS]
