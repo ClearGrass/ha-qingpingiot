@@ -195,7 +195,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
             Capability.CO2_CALIBRATION,
             Capability.TEMPERATURE_UNIT,
         ],
-        "report_interval": {"default": 900, "min": 60, "unit": "s"},
+        "report_interval": {"default": 900, "min": 30, "unit": "s"},
     },
 }
 

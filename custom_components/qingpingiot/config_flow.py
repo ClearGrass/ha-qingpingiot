@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -23,7 +22,6 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     CONF_DEVICE,
-    DEVICE_MODELS,
     DOMAIN,
     MODEL_OPTIONS,
     MQTT_TOPIC_PREFIX,

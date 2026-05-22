@@ -27,7 +27,6 @@ from .const import (
     DOMAIN,
     INDEX,
     PERCENTAGE,
-    PPB,
     PPM,
     SENSOR_BATTERY,
     SENSOR_CO2,
