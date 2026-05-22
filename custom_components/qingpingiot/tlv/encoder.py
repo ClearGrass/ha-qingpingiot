@@ -1,4 +1,5 @@
 """TLV encoder for sending commands to Qingping devices."""
+
 from __future__ import annotations
 
 import logging
@@ -8,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def int_to_bytes_little_endian(value: int, length: int, signed: bool = False) -> bytes:
     """Convert integer to little endian bytes."""
-    return value.to_bytes(length, byteorder='little', signed=signed)
+    return value.to_bytes(length, byteorder="little", signed=signed)
 
 
 def encode_tlv_packet(key: int, data: bytes) -> bytes:
@@ -33,12 +34,12 @@ def tlv_encode(command: int, packets: dict[int, bytes]) -> bytes:
     Returns:
         Complete TLV message starting with 'CG'
     """
-    payload = b''
+    payload = b""
     for key, data in packets.items():
         payload += encode_tlv_packet(key, data)
 
     # Build message: CG + command + length + payload
-    message = b'CG'
+    message = b"CG"
     message += bytes([command])
     message += int_to_bytes_little_endian(len(payload), 2)
     message += payload

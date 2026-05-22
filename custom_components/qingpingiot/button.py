@@ -1,4 +1,5 @@
 """Support for Qingping IoT button entities."""
+
 from __future__ import annotations
 
 import json
@@ -39,7 +40,9 @@ async def async_setup_entry(
     """Set up Qingping button entities from a config entry."""
     mac = config_entry.data[CONF_MAC]
     model = config_entry.data[CONF_MODEL]
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
+    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},
@@ -61,8 +64,14 @@ async def async_setup_entry(
         translation_key, tlv_key, tlv_value = CAPABILITY_BUTTON_MAP[cap]
         entities.append(
             QingpingButton(
-                coordinator, config_entry, mac, model, device_info,
-                translation_key, tlv_key, tlv_value,
+                coordinator,
+                config_entry,
+                mac,
+                model,
+                device_info,
+                translation_key,
+                tlv_key,
+                tlv_value,
             )
         )
 
@@ -103,9 +112,19 @@ class QingpingButton(CoordinatorEntity, ButtonEntity):
             packets = {self._tlv_key: bytes([self._tlv_value])}
             payload = tlv_encode(0x32, packets)
             await mqtt.async_publish(self.hass, topic, payload)
-            _LOGGER.debug("[%s] Sent TLV button %s (key=0x%02X, val=%d)", self._mac, self._attr_translation_key, self._tlv_key, self._tlv_value)
+            _LOGGER.debug(
+                "[%s] Sent TLV button %s (key=0x%02X, val=%d)",
+                self._mac,
+                self._attr_translation_key,
+                self._tlv_key,
+                self._tlv_value,
+            )
         else:
             # JSON devices use type 29 for CO2 calibration
             payload = json.dumps({"type": "29"})
             await mqtt.async_publish(self.hass, topic, payload)
-            _LOGGER.debug("[%s] Sent JSON button %s (type=29)", self._mac, self._attr_translation_key)
+            _LOGGER.debug(
+                "[%s] Sent JSON button %s (type=29)",
+                self._mac,
+                self._attr_translation_key,
+            )

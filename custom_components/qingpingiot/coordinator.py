@@ -1,4 +1,5 @@
 """Coordinator for Qingping IoT integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -119,7 +120,7 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             cmd = payload[2] if len(payload) > 2 else 0
             decoded = tlv_decode(payload)
-            _LOGGER.debug("[%s] TLV payload, decoded: %s", self.mac,decoded)
+            _LOGGER.debug("[%s] TLV payload, decoded: %s", self.mac, decoded)
             if not decoded:
                 return
 
@@ -142,10 +143,18 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 self._update_online_status(new_data)
                 return
 
-            if cmd == 0x42 and isinstance(sensor_data_list, list) and len(sensor_data_list) > 1:
+            if (
+                cmd == 0x42
+                and isinstance(sensor_data_list, list)
+                and len(sensor_data_list) > 1
+            ):
                 data = sensor_data_list[-1]
             else:
-                data = sensor_data_list[0] if isinstance(sensor_data_list, list) else sensor_data_list
+                data = (
+                    sensor_data_list[0]
+                    if isinstance(sensor_data_list, list)
+                    else sensor_data_list
+                )
 
             new_data["sensor_data"] = data
             new_data["decoded"] = decoded
@@ -211,12 +220,14 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     @callback
     def _send_json_ack(self, msg_id: int | str, timestamp: int) -> None:
         """Send ACK (type 18) for received sensor data."""
-        ack = json.dumps({
-            "type": "18",
-            "timestamp": timestamp,
-            "ack_id": msg_id,
-            "code": 0,
-        })
+        ack = json.dumps(
+            {
+                "type": "18",
+                "timestamp": timestamp,
+                "ack_id": msg_id,
+                "code": 0,
+            }
+        )
         topic = f"{MQTT_TOPIC_PREFIX}/{self.mac}/down"
         self.hass.async_create_task(
             mqtt.async_publish(self.hass, topic, ack),

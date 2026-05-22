@@ -1,4 +1,5 @@
 """Support for Qingping Device number entities."""
+
 from __future__ import annotations
 
 import json
@@ -33,16 +34,34 @@ _LOGGER = logging.getLogger(__name__)
 # Offset definitions: (conf_key, translation_key, unit, tlv_key, min, max, step, json_setting_key)
 OFFSET_DEFS = {
     Capability.TEMPERATURE: (
-        CONF_TEMPERATURE_OFFSET, "temperature_offset", "°C",
-        0x46, -10.0, 10.0, 0.1, "temperature_offset",
+        CONF_TEMPERATURE_OFFSET,
+        "temperature_offset",
+        "°C",
+        0x46,
+        -10.0,
+        10.0,
+        0.1,
+        "temperature_offset",
     ),
     Capability.HUMIDITY: (
-        CONF_HUMIDITY_OFFSET, "humidity_offset", "%",
-        0x48, -20.0, 20.0, 0.1, "humidity_offset",
+        CONF_HUMIDITY_OFFSET,
+        "humidity_offset",
+        "%",
+        0x48,
+        -20.0,
+        20.0,
+        0.1,
+        "humidity_offset",
     ),
     Capability.CO2: (
-        CONF_CO2_OFFSET, "co2_offset", "ppm",
-        0x45, -500, 500, 1, "co2_offset",
+        CONF_CO2_OFFSET,
+        "co2_offset",
+        "ppm",
+        0x45,
+        -500,
+        500,
+        1,
+        "co2_offset",
     ),
 }
 
@@ -56,7 +75,9 @@ async def async_setup_entry(
     mac = config_entry.data[CONF_MAC]
     name = config_entry.data[CONF_NAME]
     model = config_entry.data[CONF_MODEL]
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
+    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},
@@ -76,15 +97,34 @@ async def async_setup_entry(
     if model_info:
         for cap in model_info["capabilities"]:
             if cap in OFFSET_DEFS:
-                conf_key, translation_key, unit, tlv_key, min_v, max_v, step, json_key = OFFSET_DEFS[cap]
+                (
+                    conf_key,
+                    translation_key,
+                    unit,
+                    tlv_key,
+                    min_v,
+                    max_v,
+                    step,
+                    json_key,
+                ) = OFFSET_DEFS[cap]
                 # Skip noise offset for TLV devices (no TLV key)
                 if model in TLV_MODELS and tlv_key is None:
                     continue
                 entities.append(
                     QingpingOffsetNumber(
-                        coordinator, config_entry, mac, model, device_info,
-                        conf_key, translation_key, unit, tlv_key, json_key,
-                        min_v, max_v, step,
+                        coordinator,
+                        config_entry,
+                        mac,
+                        model,
+                        device_info,
+                        conf_key,
+                        translation_key,
+                        unit,
+                        tlv_key,
+                        json_key,
+                        min_v,
+                        max_v,
+                        step,
                     )
                 )
 
@@ -97,7 +137,14 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "report_interval"
 
-    def __init__(self, coordinator: QingpingCoordinator, config_entry: ConfigEntry, mac: str, model: str, device_info: dict) -> None:
+    def __init__(
+        self,
+        coordinator: QingpingCoordinator,
+        config_entry: ConfigEntry,
+        mac: str,
+        model: str,
+        device_info: dict,
+    ) -> None:
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
@@ -147,14 +194,29 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
                 0x05: int_to_bytes_little_endian(sample_interval, 2),
             }
             payload = tlv_encode(0x32, packets)
-            _LOGGER.debug("[%s] Sending TLV report_interval=%d min, sample_interval=%d s", self._mac, int_value, sample_interval)
+            _LOGGER.debug(
+                "[%s] Sending TLV report_interval=%d min, sample_interval=%d s",
+                self._mac,
+                int_value,
+                sample_interval,
+            )
             await mqtt.async_publish(self.hass, topic, payload)
         else:
-            payload = json.dumps({
-                "type": "17",
-                "setting": {"report_interval": int_value, "collect_interval": int_value},
-            })
-            _LOGGER.debug("[%s] Sending JSON report_interval=%d s, collect_interval=%d s", self._mac, int_value, int_value)
+            payload = json.dumps(
+                {
+                    "type": "17",
+                    "setting": {
+                        "report_interval": int_value,
+                        "collect_interval": int_value,
+                    },
+                }
+            )
+            _LOGGER.debug(
+                "[%s] Sending JSON report_interval=%d s, collect_interval=%d s",
+                self._mac,
+                int_value,
+                int_value,
+            )
             await mqtt.async_publish(self.hass, topic, payload)
 
     async def async_added_to_hass(self) -> None:
@@ -176,9 +238,22 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
 
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator: QingpingCoordinator, config_entry: ConfigEntry, mac: str, model: str, device_info: dict,
-                 conf_key: str, translation_key: str, unit: str, tlv_key: int | None, json_key: str,
-                 min_value: float, max_value: float, step: float) -> None:
+    def __init__(
+        self,
+        coordinator: QingpingCoordinator,
+        config_entry: ConfigEntry,
+        mac: str,
+        model: str,
+        device_info: dict,
+        conf_key: str,
+        translation_key: str,
+        unit: str,
+        tlv_key: int | None,
+        json_key: str,
+        min_value: float,
+        max_value: float,
+        step: float,
+    ) -> None:
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
@@ -225,9 +300,13 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
         else:
             device_value = int(value)
 
-        packets = {self._tlv_key: int_to_bytes_little_endian(device_value, 2, signed=True)}
+        packets = {
+            self._tlv_key: int_to_bytes_little_endian(device_value, 2, signed=True)
+        }
         payload = tlv_encode(0x32, packets)
-        _LOGGER.debug("[%s] Sending TLV offset %s=%d", self._mac, self._conf_key, device_value)
+        _LOGGER.debug(
+            "[%s] Sending TLV offset %s=%d", self._mac, self._conf_key, device_value
+        )
         await mqtt.async_publish(self.hass, topic, payload)
 
     async def _send_json_offset(self, value: float, topic: str) -> None:
@@ -239,11 +318,15 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
         else:
             device_value = int(value)
 
-        payload = json.dumps({
-            "type": "17",
-            "setting": {self._json_key: device_value},
-        })
-        _LOGGER.debug("[%s] Sending JSON offset %s=%d", self._mac, self._json_key, device_value)
+        payload = json.dumps(
+            {
+                "type": "17",
+                "setting": {self._json_key: device_value},
+            }
+        )
+        _LOGGER.debug(
+            "[%s] Sending JSON offset %s=%d", self._mac, self._json_key, device_value
+        )
         await mqtt.async_publish(self.hass, topic, payload)
 
     async def async_added_to_hass(self) -> None:

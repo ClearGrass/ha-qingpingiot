@@ -1,4 +1,5 @@
 """Support for Qingping IoT switch entities."""
+
 from __future__ import annotations
 
 import json
@@ -40,7 +41,9 @@ async def async_setup_entry(
     """Set up Qingping switch entities from a config entry."""
     mac = config_entry.data[CONF_MAC]
     model = config_entry.data[CONF_MODEL]
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
+    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},
@@ -62,8 +65,14 @@ async def async_setup_entry(
         translation_key, tlv_key, default = CAPABILITY_SWITCH_MAP[cap]
         entities.append(
             QingpingSwitch(
-                coordinator, config_entry, mac, model, device_info,
-                translation_key, tlv_key, default,
+                coordinator,
+                config_entry,
+                mac,
+                model,
+                device_info,
+                translation_key,
+                tlv_key,
+                default,
             )
         )
 
@@ -119,7 +128,13 @@ class QingpingSwitch(CoordinatorEntity, SwitchEntity):
             packets = {self._tlv_key: bytes([value])}
             payload = tlv_encode(0x32, packets)
             await mqtt.async_publish(self.hass, topic, payload)
-            _LOGGER.debug("[%s] Sent TLV %s=%d (key=0x%02X)", self._mac, self._conf_key, value, self._tlv_key)
+            _LOGGER.debug(
+                "[%s] Sent TLV %s=%d (key=0x%02X)",
+                self._mac,
+                self._conf_key,
+                value,
+                self._tlv_key,
+            )
         else:
             payload = json.dumps({"type": "17", "setting": {self._conf_key: value}})
             await mqtt.async_publish(self.hass, topic, payload)

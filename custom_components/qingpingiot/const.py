@@ -201,8 +201,7 @@ DEVICE_MODELS: dict[str, DeviceModelInfo] = {
 
 # Options for config_flow dropdown
 MODEL_OPTIONS: Final = [
-    {"value": model, "label": info["name"]}
-    for model, info in DEVICE_MODELS.items()
+    {"value": model, "label": info["name"]} for model, info in DEVICE_MODELS.items()
 ]
 
 # JSON protocol devices

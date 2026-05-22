@@ -1,4 +1,5 @@
 """Config flow for Qingping IoT integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -219,9 +220,7 @@ class QingpingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def _async_discover_devices(self) -> None:
         """Discover Qingping devices via MQTT."""
         self._discovered_devices = {}
-        configured_macs = {
-            entry.unique_id for entry in self._async_current_entries()
-        }
+        configured_macs = {entry.unique_id for entry in self._async_current_entries()}
 
         try:
             if not await mqtt.async_wait_for_mqtt_client(self.hass):
@@ -247,9 +246,7 @@ class QingpingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return
 
                 name = f"Qingping ({raw_mac})"
-                discovered[mac] = DiscoveredDevice(
-                    name=name, mac=mac, model="Unknown"
-                )
+                discovered[mac] = DiscoveredDevice(name=name, mac=mac, model="Unknown")
                 _LOGGER.debug("Discovered device: %s (%s)", name, mac)
 
             except Exception:

@@ -1,4 +1,5 @@
 """TLV decoder for Qingping devices with binary protocol."""
+
 from __future__ import annotations
 
 import logging
@@ -35,7 +36,7 @@ def tlv_unpack(byte_array: bytes) -> dict[str, Any]:
         _LOGGER.error("Byte array shorter than expected length")
         return {"cmd": cmd, "productId": 0, "length": length, "subPackList": []}
 
-    payload = byte_array[5:5 + length]
+    payload = byte_array[5 : 5 + length]
     product_id = 0
 
     index = 0
@@ -46,14 +47,14 @@ def tlv_unpack(byte_array: bytes) -> dict[str, Any]:
             _LOGGER.warning("Truncated TLV data at index %d", index)
             break
 
-        key = payload[index:index + 1].hex()
-        sub_len = bytes_to_int_little_endian(payload[index + 1:index + 3])
+        key = payload[index : index + 1].hex()
+        sub_len = bytes_to_int_little_endian(payload[index + 1 : index + 3])
 
         if index + 3 + sub_len > length:
             _LOGGER.warning("Sub-packet extends beyond payload at index %d", index)
             break
 
-        sub_payload = payload[index + 3:index + 3 + sub_len]
+        sub_payload = payload[index + 3 : index + 3 + sub_len]
         index = index + 3 + sub_len
 
         sub_pack = {
@@ -139,7 +140,7 @@ def decode_history_data(byte_array: bytes, product_id: int = 0) -> list[dict[str
     i = 0
 
     while index + pack_len <= len(byte_array):
-        history_pack = byte_array[index:index + pack_len]
+        history_pack = byte_array[index : index + pack_len]
         history_data = decode_th_data(history_pack, product_id)
         history_data["timestamp"] = timestamp + duration * i
         history_data["dataType"] = "data"
@@ -220,7 +221,7 @@ def decode_sensor_data_v2(byte_array: bytes) -> dict[str, Any]:
 def tlv_decode(byte_array: bytes) -> dict[str, Any]:
     """Main TLV decoder function."""
     try:
-        if len(byte_array) < 2 or byte_array[0:2] != b'CG':
+        if len(byte_array) < 2 or byte_array[0:2] != b"CG":
             _LOGGER.error("Invalid TLV data: does not start with 'CG' marker")
             return {}
 
@@ -329,4 +330,4 @@ def tlv_decode(byte_array: bytes) -> dict[str, Any]:
 
 def is_tlv_format(payload: bytes) -> bool:
     """Check if the payload is in TLV binary format."""
-    return len(payload) >= 2 and payload[0:2] == b'CG'
+    return len(payload) >= 2 and payload[0:2] == b"CG"

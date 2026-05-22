@@ -1,4 +1,5 @@
 """Support for Qingping IoT sensors."""
+
 from __future__ import annotations
 
 import logging
@@ -138,7 +139,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Qingping sensors from a config entry."""
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
+    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     mac = coordinator.mac
     name = coordinator.name
@@ -382,7 +385,11 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
         else:
             value = raw
 
-        if self._sensor_type == SENSOR_BATTERY and isinstance(value, int) and value >= 255:
+        if (
+            self._sensor_type == SENSOR_BATTERY
+            and isinstance(value, int)
+            and value >= 255
+        ):
             self._is_unavailable = True
             self._attr_native_value = None
             self.async_write_ha_state()
@@ -425,7 +432,9 @@ class QingpingSensor(CoordinatorEntity, SensorEntity):
             voc_value = raw_value
 
         self._attr_native_value = voc_value
-        self._attr_native_unit_of_measurement = INDEX if voc_unit == "index" else voc_unit
+        self._attr_native_unit_of_measurement = (
+            INDEX if voc_unit == "index" else voc_unit
+        )
         self._attr_device_class = _get_eTvoc_device_class(voc_unit)
 
     @property

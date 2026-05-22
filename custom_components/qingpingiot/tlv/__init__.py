@@ -1,4 +1,5 @@
 """TLV protocol implementation for Qingping devices."""
+
 from __future__ import annotations
 
 from .decoder import (

@@ -1,4 +1,5 @@
 """Support for Qingping IoT select entities."""
+
 from __future__ import annotations
 
 import json
@@ -34,7 +35,12 @@ TEMPERATURE_UNIT_OPTIONS = ["°C", "°F"]
 # Capability -> (conf_key, translation_key, options, entity_class)
 CAPABILITY_SELECT_MAP: dict[Capability, tuple[str, str, list[str], type]] = {
     Capability.ETVOC: (CONF_ETVOC_UNIT, "etvoc_unit", ETVOC_UNIT_OPTIONS, "etvoc"),
-    Capability.TEMPERATURE_UNIT: (CONF_TEMPERATURE_UNIT, "temperature_unit", TEMPERATURE_UNIT_OPTIONS, "temperature"),
+    Capability.TEMPERATURE_UNIT: (
+        CONF_TEMPERATURE_UNIT,
+        "temperature_unit",
+        TEMPERATURE_UNIT_OPTIONS,
+        "temperature",
+    ),
 }
 
 
@@ -46,7 +52,9 @@ async def async_setup_entry(
     """Set up Qingping select entities from a config entry."""
     mac = config_entry.data[CONF_MAC]
     model = config_entry.data[CONF_MODEL]
-    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
+    coordinator: QingpingCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     device_info = {
         "identifiers": {(DOMAIN, mac)},
@@ -69,15 +77,26 @@ async def async_setup_entry(
         if entity_type == "etvoc":
             entities.append(
                 QingpingTLVeTVOCUnitSelect(
-                    coordinator, config_entry, mac, device_info,
-                    conf_key, translation_key, options,
+                    coordinator,
+                    config_entry,
+                    mac,
+                    device_info,
+                    conf_key,
+                    translation_key,
+                    options,
                 )
             )
         elif entity_type == "temperature":
             entities.append(
                 QingpingTLVTemperatureUnitSelect(
-                    coordinator, config_entry, mac, model, device_info,
-                    conf_key, translation_key, options,
+                    coordinator,
+                    config_entry,
+                    mac,
+                    model,
+                    device_info,
+                    conf_key,
+                    translation_key,
+                    options,
                 )
             )
 
@@ -132,7 +151,13 @@ class QingpingTLVeTVOCUnitSelect(CoordinatorEntity, SelectEntity):
         payload = tlv_encode(0x32, packets)
         topic = f"{MQTT_TOPIC_PREFIX}/{self._mac}/down"
         await mqtt.async_publish(self.hass, topic, payload)
-        _LOGGER.debug("[%s] Sent TLV %s=%s (key=0x62, val=%d)", self._mac, self._conf_key, option, tlv_value)
+        _LOGGER.debug(
+            "[%s] Sent TLV %s=%s (key=0x62, val=%d)",
+            self._mac,
+            self._conf_key,
+            option,
+            tlv_value,
+        )
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
@@ -201,10 +226,18 @@ class QingpingTLVTemperatureUnitSelect(CoordinatorEntity, SelectEntity):
             tlv_value = self._TLV_UNIT_MAP.get(option, 0x00)
             packets = {0x19: bytes([tlv_value])}
             payload = tlv_encode(0x32, packets)
-            _LOGGER.debug("[%s] Sent TLV %s=%s (key=0x19, val=%d)", self._mac, self._conf_key, option, tlv_value)
+            _LOGGER.debug(
+                "[%s] Sent TLV %s=%s (key=0x19, val=%d)",
+                self._mac,
+                self._conf_key,
+                option,
+                tlv_value,
+            )
         else:
             json_value = self._JSON_UNIT_MAP.get(option, "C")
-            payload = json.dumps({"type": "17", "setting": {"temperature_unit": json_value}})
+            payload = json.dumps(
+                {"type": "17", "setting": {"temperature_unit": json_value}}
+            )
             _LOGGER.debug("[%s] Sent JSON %s=%s", self._mac, self._conf_key, json_value)
 
         await mqtt.async_publish(self.hass, topic, payload)
