@@ -1,7 +1,5 @@
 """Coordinator for Qingping IoT integration."""
 
-from __future__ import annotations
-
 import asyncio
 import json
 import logging
@@ -13,11 +11,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import (
-    MQTT_TOPIC_PREFIX,
-    OFFLINE_TIMEOUT_REALTIME,
-    TLV_MODELS,
-)
+from .const import MQTT_TOPIC_PREFIX, OFFLINE_TIMEOUT_REALTIME, TLV_MODELS
 from .tlv import is_tlv_format, tlv_decode
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,6 +40,7 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         model: str,
         name: str,
     ) -> None:
+        """Initialize the coordinator."""
         super().__init__(
             hass,
             _LOGGER,
@@ -71,10 +66,12 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     @property
     def is_online(self) -> bool:
+        """Return whether the device is currently online."""
         return self.data.get("online", False)
 
     @property
     def is_tlv(self) -> bool:
+        """Return whether this device uses the TLV protocol."""
         return self.model in TLV_MODELS
 
     async def async_start(self) -> None:
@@ -104,14 +101,19 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     @callback
     def _handle_message(self, message: mqtt.ReceiveMessage) -> None:
         """Route incoming MQTT messages."""
+        payload: bytes = (
+            message.payload.encode()
+            if isinstance(message.payload, str)
+            else bytes(message.payload)
+        )
         try:
-            if is_tlv_format(message.payload):
-                self._handle_tlv_message(message.payload)
+            if is_tlv_format(payload):
+                self._handle_tlv_message(payload)
             else:
-                self._handle_json_message(message.payload)
+                self._handle_json_message(payload)
         except json.JSONDecodeError:
             _LOGGER.error("[%s] Invalid JSON in MQTT message", self.mac)
-        except Exception as e:
+        except (ValueError, KeyError, TypeError) as e:
             _LOGGER.error("[%s] Error processing MQTT message: %s", self.mac, e)
 
     @callback
@@ -161,7 +163,7 @@ class QingpingCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self.async_set_updated_data(new_data)
             self._update_online_status(new_data)
 
-        except Exception as e:
+        except (ValueError, KeyError, TypeError) as e:
             _LOGGER.error("[%s] Error processing TLV message: %s", self.mac, e)
 
     @callback

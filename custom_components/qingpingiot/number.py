@@ -1,21 +1,18 @@
 """Support for Qingping Device number entities."""
 
-from __future__ import annotations
-
 import json
 import logging
 
 from homeassistant.components import mqtt
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_MAC, CONF_NAME, CONF_MODEL
+from homeassistant.const import CONF_MAC, CONF_MODEL, EntityCategory
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    Capability,
     CONF_CO2_OFFSET,
     CONF_HUMIDITY_OFFSET,
     CONF_REPORT_INTERVAL,
@@ -25,6 +22,7 @@ from .const import (
     DOMAIN,
     MQTT_TOPIC_PREFIX,
     TLV_MODELS,
+    Capability,
 )
 from .coordinator import QingpingCoordinator
 from .tlv import int_to_bytes_little_endian, tlv_encode
@@ -69,22 +67,22 @@ OFFSET_DEFS = {
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up Qingping number entities from a config entry."""
     mac = config_entry.data[CONF_MAC]
-    name = config_entry.data[CONF_NAME]
+    name = config_entry.title
     model = config_entry.data[CONF_MODEL]
     coordinator: QingpingCoordinator = config_entry.runtime_data.coordinator
 
-    device_info = {
+    device_info: DeviceInfo = {
         "identifiers": {(DOMAIN, mac)},
         "name": name,
         "manufacturer": "Qingping",
         "model": model,
     }
 
-    entities = [
+    entities: list[NumberEntity] = [
         QingpingReportIntervalNumber(
             coordinator, config_entry, mac, model, device_info
         ),
@@ -141,15 +139,21 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
         config_entry: ConfigEntry,
         mac: str,
         model: str,
-        device_info: dict,
+        device_info: DeviceInfo,
     ) -> None:
+        """Initialize the report interval number entity."""
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
         self._model = model
         self._is_tlv = model in TLV_MODELS
 
-        ri_config = DEVICE_MODELS.get(model, {}).get("report_interval", {})
+        model_info = DEVICE_MODELS.get(model)
+        ri_config = (
+            model_info["report_interval"]
+            if model_info
+            else {"default": 15, "min": 1, "unit": "min"}
+        )
         self._ri_default = ri_config.get("default", 15)
         ri_unit = ri_config.get("unit", "min")
 
@@ -166,6 +170,7 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
 
     @property
     def native_value(self) -> int:
+        """Return the current report interval value."""
         return self.coordinator.data.get(
             CONF_REPORT_INTERVAL,
             self._config_entry.data.get(
@@ -175,6 +180,7 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
         )
 
     async def async_set_native_value(self, value: float) -> None:
+        """Set the report interval value."""
         int_value = int(value)
         self.coordinator.data[CONF_REPORT_INTERVAL] = int_value
         self.async_write_ha_state()
@@ -191,7 +197,7 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
                 0x04: int_to_bytes_little_endian(int_value, 2),
                 0x05: int_to_bytes_little_endian(sample_interval, 2),
             }
-            payload = tlv_encode(0x32, packets)
+            payload: bytes | str = tlv_encode(0x32, packets)
             _LOGGER.debug(
                 "[%s] Sending TLV report_interval=%d min, sample_interval=%d s",
                 self._mac,
@@ -218,6 +224,7 @@ class QingpingReportIntervalNumber(CoordinatorEntity, NumberEntity):
             await mqtt.async_publish(self.hass, topic, payload)
 
     async def async_added_to_hass(self) -> None:
+        """Handle entity added to hass."""
         await super().async_added_to_hass()
         self._handle_coordinator_update()
 
@@ -242,7 +249,7 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
         config_entry: ConfigEntry,
         mac: str,
         model: str,
-        device_info: dict,
+        device_info: DeviceInfo,
         conf_key: str,
         translation_key: str,
         unit: str,
@@ -252,6 +259,7 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
         max_value: float,
         step: float,
     ) -> None:
+        """Initialize the offset number entity."""
         super().__init__(coordinator)
         self._config_entry = config_entry
         self._mac = mac
@@ -271,12 +279,14 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
 
     @property
     def native_value(self) -> float:
+        """Return the current offset value."""
         return self.coordinator.data.get(
             self._conf_key,
             self._config_entry.data.get(self._conf_key, DEFAULT_OFFSET),
         )
 
     async def async_set_native_value(self, value: float) -> None:
+        """Set the offset value."""
         self.coordinator.data[self._conf_key] = value
         self.async_write_ha_state()
 
@@ -298,6 +308,7 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
         else:
             device_value = int(value)
 
+        assert self._tlv_key is not None
         packets = {
             self._tlv_key: int_to_bytes_little_endian(device_value, 2, signed=True)
         }
@@ -328,6 +339,7 @@ class QingpingOffsetNumber(CoordinatorEntity, NumberEntity):
         await mqtt.async_publish(self.hass, topic, payload)
 
     async def async_added_to_hass(self) -> None:
+        """Handle entity added to hass."""
         await super().async_added_to_hass()
         self._handle_coordinator_update()
 
