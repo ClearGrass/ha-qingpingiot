@@ -1,185 +1,199 @@
 {
-  "config": {
-    "step": {
-      "user": {
-        "title": "Qingping Device",
-        "description": "Select a discovered device or add manually.",
-        "data": {
-          "device": "Device"
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured",
+            "reconfigure_successful": "Reconfiguration was successful"
+        },
+        "error": {
+            "invalid_mac": "Invalid MAC address format. Use 12 hex characters (e.g. AABBCCDDEEFF)."
+        },
+        "step": {
+            "confirm": {
+                "data": {
+                    "model": "Model",
+                    "name": "Name"
+                },
+                "data_description": {
+                    "model": "Select the device model."
+                },
+                "description": "MAC: {mac}",
+                "title": "Confirm Device"
+            },
+            "manual": {
+                "data": {
+                    "mac": "MAC Address",
+                    "model": "Model",
+                    "name": "Name"
+                },
+                "data_description": {
+                    "mac": "The 12-character hex MAC address of the device (e.g. AABBCCDDEEFF).",
+                    "model": "Select the device model."
+                },
+                "description": "Enter device MAC address and select model.",
+                "title": "Add Device Manually"
+            },
+            "reconfigure": {
+                "data": {
+                    "model": "Model"
+                },
+                "data_description": {
+                    "model": "Select the device model to update."
+                },
+                "description": "Update settings for {device_name}.",
+                "title": "Reconfigure Device"
+            },
+            "user": {
+                "data": {
+                    "device": "Device"
+                },
+                "data_description": {
+                    "device": "Select a discovered Qingping device."
+                },
+                "description": "Select a discovered device or add manually.",
+                "title": "Qingping Device"
+            }
         }
-      },
-      "confirm": {
-        "title": "Confirm Device",
-        "description": "MAC: {mac}",
-        "data": {
-          "name": "Name",
-          "model": "Model"
-        }
-      },
-      "manual": {
-        "title": "Add Device Manually",
-        "description": "Enter device MAC address and select model.",
-        "data": {
-          "name": "Name",
-          "mac": "MAC Address",
-          "model": "Model"
-        }
-      },
-      "reconfigure": {
-        "title": "Reconfigure Device",
-        "description": "Update settings for {device_name}.",
-        "data": {
-          "model": "Model"
-        }
-      }
     },
-    "error": {
-      "invalid_mac": "Invalid MAC address format. Use 12 hex characters (e.g. AABBCCDDEEFF)."
+    "entity": {
+        "button": {
+            "co2_calibration": {
+                "name": "CO2 Manual Calibration"
+            }
+        },
+        "number": {
+            "co2_offset": {
+                "name": "CO2 Compensation"
+            },
+            "humidity_offset": {
+                "name": "Humidity Compensation"
+            },
+            "noise_offset": {
+                "name": "Noise Compensation"
+            },
+            "pm10_offset": {
+                "name": "PM10 Compensation"
+            },
+            "pm25_offset": {
+                "name": "PM2.5 Compensation"
+            },
+            "report_interval": {
+                "name": "Interval of Uploading"
+            },
+            "temperature_offset": {
+                "name": "Temp Compensation"
+            },
+            "tvoc_index_offset": {
+                "name": "eTVOC index Compensation"
+            }
+        },
+        "select": {
+            "etvoc_unit": {
+                "name": "eTVOC Unit",
+                "state": {
+                    "index": "VOC Index",
+                    "mg_m3": "mg/m\u00b3",
+                    "ppb": "ppb"
+                }
+            },
+            "temperature_unit": {
+                "name": "Temperature Unit",
+                "state": {
+                    "celsius": "\u00b0C",
+                    "fahrenheit": "\u00b0F"
+                }
+            }
+        },
+        "sensor": {
+            "battery": {
+                "name": "Battery"
+            },
+            "battery_state": {
+                "name": "Battery State",
+                "state": {
+                    "charging": "Charging",
+                    "discharging": "Discharging",
+                    "full": "Full",
+                    "unknown": "Unknown"
+                }
+            },
+            "co2": {
+                "name": "CO2"
+            },
+            "etvoc": {
+                "name": "eTVOC"
+            },
+            "firmware": {
+                "name": "Firmware"
+            },
+            "humidity": {
+                "name": "Relative Humidity"
+            },
+            "light": {
+                "name": "Light"
+            },
+            "mac": {
+                "name": "MAC Address"
+            },
+            "noise": {
+                "name": "Noise"
+            },
+            "pm10": {
+                "name": "PM10"
+            },
+            "pm25": {
+                "name": "PM2.5"
+            },
+            "pressure": {
+                "name": "Pressure"
+            },
+            "signal_strength": {
+                "name": "Signal Strength"
+            },
+            "status": {
+                "name": "Status",
+                "state": {
+                    "offline": "Offline",
+                    "online": "Online"
+                }
+            },
+            "temperature": {
+                "name": "Temperature"
+            },
+            "tvoc": {
+                "name": "TVOC"
+            }
+        },
+        "switch": {
+            "co2_asc": {
+                "name": "CO2 Auto Self-Calibration"
+            },
+            "led_indicator": {
+                "name": "Rating Light"
+            }
+        }
     },
-    "abort": {
-      "already_configured": "This device is already configured."
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "model": "Model"
+                },
+                "title": "Qingping Options"
+            }
+        }
+    },
+    "selector": {
+        "device": {
+            "options": {
+                "manual": "Manually add a device"
+            }
+        },
+        "model": {
+            "options": {
+                "cgf2w": "Qingping Multi-Role Monitor Pro",
+                "cgr1w": "Qingping Indoor Environment Monitor",
+                "cgs2": "Qingping Air Monitor"
+            }
+        }
     }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Qingping Options",
-        "data": {
-          "model": "Model"
-        }
-      }
-    }
-  },
-  "selector": {
-    "device": {
-      "options": {
-        "manual": "Manually add a device"
-      }
-    },
-    "model": {
-      "options": {
-        "cgr1w": "Qingping Indoor Environment Monitor",
-        "cgf2w": "Qingping Multi-Role Monitor Pro",
-        "cgs2": "Qingping Air Monitor"
-      }
-    }
-  },
-  "entity": {
-    "sensor": {
-      "temperature": {
-        "name": "Temperature"
-      },
-      "humidity": {
-        "name": "Relative Humidity"
-      },
-      "co2": {
-        "name": "CO2"
-      },
-      "pm25": {
-        "name": "PM2.5"
-      },
-      "pm10": {
-        "name": "PM10"
-      },
-      "tvoc": {
-        "name": "TVOC"
-      },
-      "etvoc": {
-        "name": "eTVOC"
-      },
-      "noise": {
-        "name": "Noise"
-      },
-      "pressure": {
-        "name": "Pressure"
-      },
-      "light": {
-        "name": "Light"
-      },
-      "battery": {
-        "name": "Battery"
-      },
-      "signal_strength": {
-        "name": "Signal Strength"
-      },
-      "status": {
-        "name": "Status",
-        "state": {
-          "online": "Online",
-          "offline": "Offline"
-        }
-      },
-      "firmware": {
-        "name": "Firmware"
-      },
-      "mac": {
-        "name": "MAC Address"
-      },
-      "battery_state": {
-        "name": "Battery State",
-        "state": {
-          "charging": "Charging",
-          "discharging": "Discharging",
-          "full": "Full",
-          "unknown": "Unknown"
-        }
-      }
-    },
-    "number": {
-      "report_interval": {
-        "name": "Interval of Uploading"
-      },
-      "temperature_offset": {
-        "name": "Temp Compensation"
-      },
-      "humidity_offset": {
-        "name": "Humidity Compensation"
-      },
-      "co2_offset": {
-        "name": "CO2 Compensation"
-      },
-      "pm25_offset": {
-        "name": "PM2.5 Compensation"
-      },
-      "pm10_offset": {
-        "name": "PM10 Compensation"
-      },
-      "noise_offset": {
-        "name": "Noise Compensation"
-      },
-      "tvoc_index_offset": {
-        "name": "eTVOC index Compensation"
-      }
-    },
-    "select": {
-      "etvoc_unit": {
-        "name": "eTVOC Unit",
-        "state": {
-          "index": "VOC Index",
-          "ppb": "ppb",
-          "mg_m3": "mg/m³"
-        }
-      },
-      "temperature_unit": {
-        "name": "Temperature Unit",
-        "state": {
-          "celsius": "°C",
-          "fahrenheit": "°F"
-        }
-      }
-    },
-    "switch": {
-      "co2_asc": {
-        "name": "CO2 Auto Self-Calibration"
-      },
-      "led_indicator": {
-        "name": "Rating Light"
-      }
-    },
-    "button": {
-      "co2_calibration": {
-        "name": "CO2 Manual Calibration"
-      }
-    }
-  }
 }
